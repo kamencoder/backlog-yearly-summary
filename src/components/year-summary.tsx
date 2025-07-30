@@ -120,7 +120,6 @@ export const YearSummary = () => {
                     yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 120 }]}
                     xAxis={[{ label: "Games Finished" }]}
                     series={[{ dataKey: 'total' }]}
-                    height={300}
                     layout="horizontal"
                   />
                 </Grid>
@@ -135,6 +134,7 @@ export const YearSummary = () => {
                         })),
                         arcLabel: (params) => params.label?.replace(/\(.+\)/, '') ?? '',
                         arcLabelMinAngle: 20,
+                        arcLabelRadius: "80%"
                       },
                     ]}
                     slotProps={{
