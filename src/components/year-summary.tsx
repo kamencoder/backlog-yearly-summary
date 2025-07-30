@@ -28,6 +28,7 @@ import { DateTime } from 'luxon';
 import { Game } from './game';
 import { DataContext } from '../data/DataContext';
 import { AcquisitionGuage } from './acquisition-guage';
+import InfoIcon from './info-icon';
 
 type PlatformPieTotal = PlatformTotal & { otherPlatformDetails?: string[] };
 
@@ -108,7 +109,10 @@ export const YearSummary = () => {
         <Grid size={12} container>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" gutterBottom>Platform Totals</Typography>
+              <Stack direction={"row"}>
+                <Typography flex={1} variant="h6" gutterBottom>Platform Totals</Typography>
+                <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+              </Stack>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 8 }}>
                   <BarChart
@@ -149,7 +153,10 @@ export const YearSummary = () => {
         <Grid size={12}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" gutterBottom>Game Lengths</Typography>
+              <Stack direction={"row"}>
+                <Typography flex={1} variant="h6" gutterBottom>Game Lengths</Typography>
+                <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB. Game length is determined by your Playtime entered for each game." />
+              </Stack>
               <LineChart
                 title="Game Lengths"
                 dataset={summary.lengthGroupTotals as any}
@@ -170,8 +177,10 @@ export const YearSummary = () => {
         <Grid size={12}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" gutterBottom>Release Decade Totals</Typography>
-
+              <Stack direction={"row"}>
+                <Typography flex={1} variant="h6" gutterBottom>Release Decade Totals</Typography>
+                <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+              </Stack>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 8 }}>
                   <BarChart
@@ -213,7 +222,10 @@ export const YearSummary = () => {
         <Grid size={12}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" gutterBottom>Acquisitions</Typography>
+              <Stack direction={"row"}>
+                <Typography flex={1} variant="h6" gutterBottom>Added to the Backlog</Typography>
+                <InfoIcon text="Includes games acquired within this year based on the Acquisition Date set on the game in IB. The number of games played includes total number of games among those acquired this year which are marked as playing or played. The number of games finished includes total number of those acquired this year which are marked beaten or completed." />
+              </Stack>
               {!summary.acquisitions.totalAcquired && (
                 <Alert variant="outlined" icon={<Warning fontSize="inherit" />} severity="warning" sx={{ marginBottom: '16px' }}>
                   You must fill in the "Acquisition Date" on your games in order for this tool to be able to tell that you bought or received them this year.
@@ -274,7 +286,10 @@ export const YearSummary = () => {
         <Grid size={12} container>
           <Card variant="outlined" sx={{ width: "100%" }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Completion by month</Typography>
+              <Stack direction={"row"}>
+                <Typography flex={1} variant="h6" gutterBottom>Completion by month</Typography>
+                <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+              </Stack>
               <BarChart
                 sx={{ minHeight: '300px' }}
                 height={240}
