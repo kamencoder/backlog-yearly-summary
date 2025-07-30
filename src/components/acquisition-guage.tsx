@@ -2,6 +2,7 @@ import { green, red, yellow } from "@mui/material/colors"
 import { useMemo } from "react";
 import GaugeComponent, { type SubArc } from "react-gauge-component";
 import type { AcquisitionSummary } from "../data/summarizer";
+import { Box } from "@mui/material";
 
 export interface AcquisitionsGuageProps {
   acquisitionSummary: AcquisitionSummary;
@@ -52,33 +53,36 @@ export const AcquisitionGuage = (props: AcquisitionsGuageProps) => {
   }, [acquisitionSummary]);
 
   return (
-    <GaugeComponent
-      type="semicircle"
-      arc={{
-        width: 0.2,
-        padding: 0.005,
-        cornerRadius: 1,
-        subArcs: arcs
-      }}
-      pointer={{
-        color: '#345243',
-        length: 0.90,
-        width: 12,
-      }}
-      labels={{
-        valueLabel: { formatTextValue: value => value + '%' },
-        tickLabels: {
-          type: 'outer',
-          defaultTickValueConfig: {
-            formatTextValue: (value: any) => value + '%',
-            style: { fontSize: 10 }
-          },
-          ticks: Array.from('1'.repeat(10)).map((n, i) => { return { value: parseInt(n) * (i + 1) * 10 } })
-        }
-      }}
-      value={noData ? 0 : Math.ceil(acquisitionSummary.totalPlayed / acquisitionSummary.totalAcquired * 100)}
-      minValue={0}
-      maxValue={100}
-    />
+    <Box maxWidth={"600px"} width={"100%"}>
+      <GaugeComponent
+        type="semicircle"
+        arc={{
+          width: 0.2,
+          padding: 0.005,
+          cornerRadius: 1,
+          subArcs: arcs
+        }}
+        pointer={{
+          color: '#345243',
+          length: 0.90,
+          width: 12,
+        }}
+        labels={{
+          valueLabel: { formatTextValue: value => value + '%' },
+          tickLabels: {
+            type: 'outer',
+            defaultTickValueConfig: {
+              formatTextValue: (value: any) => value + '%',
+              style: { fontSize: 10 }
+            },
+            ticks: Array.from('1'.repeat(10)).map((n, i) => { return { value: parseInt(n) * (i + 1) * 10 } })
+          }
+        }}
+        value={noData ? 0 : Math.ceil(acquisitionSummary.totalPlayed / acquisitionSummary.totalAcquired * 100)}
+        minValue={0}
+        maxValue={100}
+      // style={{ maxWidth: "500px" }}
+      />
+    </Box>
   );
 }

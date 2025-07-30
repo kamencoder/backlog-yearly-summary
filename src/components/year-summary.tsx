@@ -227,7 +227,7 @@ export const YearSummary = () => {
                     <SingleStat value={summary.acquisitions.totalFinished} label="Finished" color={green[500]} />
                   </Stack>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 12, md: 10 }}>
+                <Grid size={{ xs: 12, sm: 12, md: 10 }} display={"flex"} justifyContent={"center"}>
                   <AcquisitionGuage acquisitionSummary={summary.acquisitions} />
                 </Grid>
                 <Grid size={12}>
