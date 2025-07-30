@@ -40,6 +40,7 @@ export const YearSummary = () => {
   }
 
   const sortedPlatformsByTotal = useMemo(() => summary.platformTotals.sort((a, b) => b.total - a.total), [summary.platformTotals]);
+  console.log('PLATFORM TOTAL: ', sortedPlatformsByTotal.length)
   const platforPie: PlatformPieTotal[] = useMemo(() => sortedPlatformsByTotal.reduce((acc: PlatformPieTotal[], platform: PlatformTotal) => {
     if (platform.total === 1) {
       const otherGroup = acc.find(p => p.platform === 'Other');
@@ -117,10 +118,11 @@ export const YearSummary = () => {
                 <Grid size={{ xs: 12, md: 8 }}>
                   <BarChart
                     dataset={sortedPlatformsByTotal as any}
-                    yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 120 }]}
+                    yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
                     xAxis={[{ label: "Games Finished" }]}
                     series={[{ dataKey: 'total' }]}
                     layout="horizontal"
+                    sx={{ height: `${25 * (sortedPlatformsByTotal.length < 8 ? 8 : sortedPlatformsByTotal.length)}px` }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 4 }}>
