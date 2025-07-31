@@ -1,5 +1,6 @@
 import type { CsvData } from "./DataContext";
 import { DateTime } from "luxon";
+import { platforms } from "./platforms";
 
 // YEARLY SUMMARY
 // Games finished (beat or complete)
@@ -58,41 +59,6 @@ const LengthGroupSorting = {
   [LengthGroupEnum.extralong]: 6,
   [LengthGroupEnum.extraextralong]: 7,
   [LengthGroupEnum.unknown]: 8,
-}
-const platformAbbreviations: { [key: string]: string } = {
-  'Windows PC': 'PC',
-  'Web browser': 'Web',
-  'Nintendo Entertainment System': 'NES',
-  'Family Computer': 'Famicom',
-  'Super Famicom': 'SFC',
-  'Super Nintendo Entertainment System': 'SNES',
-  'Nintendo 64': 'N64',
-  'Nintendo GameCube': 'GC',
-  'Nintendo Switch': 'Switch',
-  'Nintendo Switch 2': 'Switch2',
-  'Game Boy': 'GB',
-  'Game Boy Color': 'GBC',
-  'Game Boy Advance': 'GBA',
-  'Nintendo DS': 'DS',
-  'Nintendo 3DS': '3DS',
-  'Sega Master System': 'SMS',
-  'Sega Genesis': 'Genesis',
-  'Sega Game Gear': 'GG',
-  'Sega CD': 'SegaCD',
-  'Sega 32X': '32X',
-  'Sega Mega Drive': 'MD',
-  'Sega Saturn': 'Saturn',
-  'Sega Dreamcast': 'DC',
-  'Turbografx-16/PC Engine CD': 'TG16',
-  'PlayStation': 'PS1',
-  'PlayStation 2': 'PS2',
-  'PlayStation 3': 'PS3',
-  'PlayStation 4': 'PS4',
-  'PlayStation 5': 'PS5',
-  'Xbox': 'XB',
-  'Xbox 360': '360',
-  'Xbox One': 'XB1',
-  'Xbox Series X|S': 'XBS',
 }
 
 export type SummaryGameInfo = {
@@ -266,7 +232,7 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
 
     const acquisitionDate = acquisitionDateRaw ? DateTime.fromISO(acquisitionDateRaw, { setZone: true }) : null;
     const acquisitionYear = acquisitionDate?.year
-    const platformAbbreviation = `${platformAbbreviations[platform] || platform}`
+    const platformAbbreviation = platforms.find(p => p.name === platform)?.abbreviation || platform;
 
     let gameIncluded = false;
     if (completionYear && completionYear >= year && completionYear < (year + 1)) {
