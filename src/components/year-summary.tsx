@@ -92,9 +92,9 @@ export const YearSummary = () => {
           You must fill in the "Completion Date" on your games in order for this tool to be able to tell that you finished them this year.
         </Alert>
       )}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} >
         <Grid size={12}>
-          <Card >
+          <Card sx={{ width: "100%" }}>
             <CardContent>
               <Stack spacing={3} direction="row" sx={{
                 justifyContent: "center",
@@ -108,7 +108,7 @@ export const YearSummary = () => {
           </Card>
         </Grid>
         <Grid size={12} container>
-          <Card variant="outlined">
+          <Card variant="outlined" sx={{ width: "100%" }}>
             <CardContent>
               <Stack direction={"row"}>
                 <Typography flex={1} variant="h6" gutterBottom>Platform Totals</Typography>
