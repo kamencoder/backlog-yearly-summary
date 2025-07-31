@@ -213,25 +213,57 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     games: [],
   }
 
+  const getBundleParentGame = (games: CsvData[], childGameIndex: number) => {
+    if (childGameIndex === 0) return null;
+
+    for (let i = childGameIndex - 1; i--;) {
+      if (games[i]?.['Type']?.toString() !== 'Bundled Game') {
+        return games[i];
+      }
+    }
+  }
+
   games.forEach((game, i) => {
+    const nextGame = games.length > i + 1 ? games[i + 1] : null;
     const id = game['IGDB ID']?.toString() || `unknown_${i}`;
     const title = game['Game name']?.toString() || 'Unknown Title';
-    const platform = game['Platform']?.toString() || 'Unknown';
-    const platformAbbreviation = `${platformAbbreviations[platform] || platform}`
+    let platform = game['Platform']?.toString();
     const releaseDateRaw = game['Game release date']?.toString();
     const releaseDate = releaseDateRaw ? DateTime.fromISO(releaseDateRaw) : null;
     const completion = game['Completion']?.toString() || 'Unknown';
     const status = game['Status']?.toString() || 'Unknown';
-    const acquisitionDateRaw = game['Acquisition date']?.toString();
-    const acquisitionDate = acquisitionDateRaw ? DateTime.fromISO(acquisitionDateRaw, { setZone: true }) : null;
-    const acquisitionYear = acquisitionDate?.year
+    let acquisitionDateRaw = game['Acquisition date']?.toString();
+
     const completionDateRaw = game['Completion date']?.toString();
     const completionDate = completionDateRaw ? DateTime.fromISO(completionDateRaw, { setZone: true }) : null;
     const completionYear = completionDate?.year;
     const playTime = game['Playtime'] ? parseInt(game['Playtime'].toString()) : null
+    const type = game['Type']?.toString(); // (Bundled Game)
     const coverImage = game['Cover']?.toString() || null;
     const ratingRaw = game['Rating (Score)']?.toString();
     const rating = ratingRaw ? parseFloat(ratingRaw) / 2 : null; // comes in as 10 point raiting, need 
+
+    const isBundleParent = nextGame?.['Type']?.toString() === 'Bundled Game';
+    if (isBundleParent) {
+      return; // Skip parent
+    }
+
+    const isBundleChild = type === 'Bundled Game';
+    if (isBundleChild) {
+      // Currently for game bundles, the parent game will have a record and all games that are part of that bundle will be right after it. 
+      const parentGame = getBundleParentGame(games, i);
+      if (parentGame) {
+        platform = platform || parentGame?.['Platform']?.toString();
+        acquisitionDateRaw = acquisitionDateRaw || parentGame?.['Acquisition date']?.toString();
+      }
+    }
+    if (!platform) {
+      platform = 'Unknown'; // Set to unknown if we still don't have a platform.
+    }
+
+    const acquisitionDate = acquisitionDateRaw ? DateTime.fromISO(acquisitionDateRaw, { setZone: true }) : null;
+    const acquisitionYear = acquisitionDate?.year
+    const platformAbbreviation = `${platformAbbreviations[platform] || platform}`
 
     let gameIncluded = false;
     if (completionYear && completionYear >= year && completionYear < (year + 1)) {
