@@ -69,7 +69,7 @@ export type SummaryGameInfo = {
   platformAbbreviation: string;
   status: string;
   completion: string;
-  releaseYear: string | null;
+  releaseYear: number | null;
   acquisitionDate: string | null;
   acquisitionMonth: string | null;
   acquiredThisYear: boolean;
@@ -197,6 +197,8 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     let platform = game['Platform']?.toString();
     const releaseDateRaw = game['Game release date']?.toString();
     const releaseDate = releaseDateRaw ? DateTime.fromISO(releaseDateRaw) : null;
+    const releaseYear = (releaseDate && releaseDate.isValid) ? releaseDate.year : null;
+    const releaseDecade = releaseYear ? getDecadeFromYear(releaseYear) : 0;
     const completion = game['Completion']?.toString() || 'Unknown';
     const status = game['Status']?.toString() || 'Unknown';
     let acquisitionDateRaw = game['Acquisition date']?.toString();
@@ -271,8 +273,6 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       }
 
       // Update release decade totals
-      const releaseYear = releaseDate ? releaseDate.year : null;
-      const releaseDecade = getDecadeFromYear(releaseYear);
       const decadeLabel = releaseDecade ? `${releaseDecade}s` : 'Unknown';
       const decadeTotal = summary.releaseDecadeTotals.find(yr => yr.decade === releaseDecade);
       if (decadeTotal) {
@@ -307,7 +307,7 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
         platformAbbreviation,
         status,
         completion,
-        releaseYear: releaseDate?.year?.toString() || null,
+        releaseYear,
         acquisitionDate: acquisitionDate?.toFormat('MMM dd') || null,
         acquisitionMonth: acquisitionDate ? acquisitionDate.monthLong : null,
         completionDate: completionDate?.toFormat('MMM dd') || null,

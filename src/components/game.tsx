@@ -102,7 +102,7 @@ export const Game = (props: GameProps) => {
           <Box display="flex">
             <Stack flex="1">
               <Typography variant="body2">
-                {game.platformAbbreviation} - {game.releaseYear}
+                {game.platformAbbreviation}{game.releaseYear ? ` - ${game.releaseYear}` : ''}
               </Typography>
               {
                 <Typography variant="body2">
