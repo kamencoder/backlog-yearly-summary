@@ -32,6 +32,7 @@ export type SummaryGroupWindow = typeof SummaryGroupWindowEnum[keyof typeof Summ
 
 export interface ReleaseDecadeTotal {
   decade: number;
+  decadeLabel: string;
   total: number;
 };
 export interface PlatformTotal {
@@ -272,11 +273,16 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       // Update release decade totals
       const releaseYear = releaseDate ? releaseDate.year : null;
       const releaseDecade = getDecadeFromYear(releaseYear);
+      const decadeLabel = releaseDecade ? `${releaseDecade}s` : 'Unknown';
       const decadeTotal = summary.releaseDecadeTotals.find(yr => yr.decade === releaseDecade);
       if (decadeTotal) {
         decadeTotal.total += 1;
       } else {
-        summary.releaseDecadeTotals.push({ decade: releaseDecade, total: 1 });
+        summary.releaseDecadeTotals.push({
+          decade: releaseDecade,
+          decadeLabel,
+          total: 1
+        });
       }
     }
 
@@ -324,20 +330,25 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     lt.totalTimeSpent = getPlayTimeInHours(lt.totalTimeSpent) || 0;
   });
 
+
   // Sort release decades by decade
   summary.releaseDecadeTotals.sort((a, b) => a.decade - b.decade);
-
   // Add missing decades
-  const earliestDecade = summary.releaseDecadeTotals[0]?.decade || 0;
+  const earliestPossibleDecade = 1960;
+  const earliestDecade = summary.releaseDecadeTotals.filter(t => Boolean(t.decade))?.[0]?.decade || 0;
   const latestDecade = summary.releaseDecadeTotals[summary.releaseDecadeTotals.length - 1]?.decade || 0;
   if (earliestDecade !== latestDecade) {
     // Add missing decades
-    for (let decade = earliestDecade + 10; decade < latestDecade; decade += 10) {
+    const startingDecade = (earliestDecade < earliestPossibleDecade ? earliestPossibleDecade : earliestDecade)
+    for (let decade = startingDecade + 10; decade < latestDecade; decade += 10) {
       if (!summary.releaseDecadeTotals.find(d => d.decade === decade)) {
-        summary.releaseDecadeTotals.push({ decade, total: 0 });
+        summary.releaseDecadeTotals.push({ decade, decadeLabel: `${decade}s`, total: 0 });
       }
     }
   }
+  // Resort release decades by decade
+  summary.releaseDecadeTotals.sort((a, b) => a.decade - b.decade);
+
   // add acquisition percentages
   if (summary.acquisitions.totalAcquired > 0) {
     summary.acquisitions.percentPlayed = Math.round((summary?.acquisitions.totalPlayed / summary.acquisitions.totalAcquired) * 100)

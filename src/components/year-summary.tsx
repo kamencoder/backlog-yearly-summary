@@ -188,7 +188,7 @@ export const YearSummary = () => {
                   <BarChart
                     title="Release Decade Totals"
                     dataset={summary.releaseDecadeTotals as any}
-                    xAxis={[{ dataKey: 'decade', scaleType: 'band', label: "Release Decade" }]}
+                    xAxis={[{ dataKey: 'decadeLabel', scaleType: 'band', label: "Release Decade" }]}
                     yAxis={[{ label: "Games Finished" }]}
                     series={[{ dataKey: 'total' }]}
                     height={250}
@@ -199,12 +199,13 @@ export const YearSummary = () => {
                     series={[
                       {
                         data: summary.releaseDecadeTotals.map(x => ({
-                          id: x.decade,
-                          label: `${x.decade?.toString()}s`,
+                          id: x.decadeLabel,
+                          label: x.decadeLabel,
                           value: x.total
                         })),
                         arcLabel: (params) => params.label || '',
                         arcLabelMinAngle: 20,
+                        arcLabelRadius: "80%"
                       },
                     ]}
                     slotProps={{
