@@ -243,6 +243,9 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     const ratingRaw = game['Rating (Score)']?.toString();
     const rating = ratingRaw ? parseFloat(ratingRaw) / 2 : null; // comes in as 10 point raiting, need 
 
+    if (status === 'No Status') {
+      return; // Skip no status
+    }
     const isBundleParent = nextGame?.['Type']?.toString() === 'Bundled Game';
     if (isBundleParent) {
       return; // Skip parent
