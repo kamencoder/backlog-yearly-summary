@@ -5,9 +5,8 @@ import { DataContext } from '../data/DataContext';
 import { Box, Button, Link, List, ListItem, MenuItem, Select, styled, Typography } from '@mui/material';
 import { UploadFile } from '@mui/icons-material';
 
-const DataImporter = () => {
-
-  const VisuallyHiddenInput = styled('input')({
+export const FileInput: React.FC<{ onChange: (event: React.ChangeEvent<HTMLInputElement>) => void }> = ({ onChange }) => {
+  const StyledFileInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
     height: 1,
@@ -17,29 +16,46 @@ const DataImporter = () => {
     left: 0,
     whiteSpace: 'nowrap',
     width: 1,
+  })
+  return <StyledFileInput type="file" accept=".csv" onChange={onChange} />;
+};
+
+export const parseFile = (file: File): Promise<CsvData[]> => {
+  return new Promise<CsvData[]>((resolve, reject) => {
+    if (!file) {
+      return reject(new Error('No file provided'));
+    }
+    Papa.parse<CsvData>(file, {
+      header: true,
+      dynamicTyping: true,
+      complete: (results: ParseResult<CsvData>) => {
+        resolve(results.data);
+      },
+      error: (error: unknown) => {
+        reject(error);
+      },
+    });
   });
+}
+
+const DataImporter = () => {
 
   const currentYear = (new Date()).getFullYear();
   const selectableYears = Array.from({ length: 10 }, (_x, i) => currentYear - i);
   const dataContext = useContext(DataContext);
   // const [ csvData, setCsvData ] = React.useState<CsvData[]>([]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      Papa.parse<CsvData>(file, {
-        header: true,
-        dynamicTyping: true,
-        complete: (results: ParseResult<CsvData>) => {
-          console.log("Parsed CSV data:", results.data);
-          dataContext.initialize(results.data);
-          // setCsvData(results.data);
-        },
-        error: (error: unknown) => {
-          console.error("Error parsing CSV file:", error);
-        },
-      });
+      try {
+        const result = await parseFile(file);
+        dataContext.initialize(result);
+      } catch (error) {
+        console.error("Error parsing file:", error);
+      }
     }
+    event.target.value = '';
   };
 
   return (
@@ -77,24 +93,16 @@ const DataImporter = () => {
             >
               {selectableYears.map(year => (<MenuItem value={year}>{year}</MenuItem>))}
             </Select>
-            {/* <Container style={{ alignContent: 'center', justifyContent: 'center', width: '100%', height: '100%' }}> */}
             < Button
               component="label"
               role={undefined}
               variant="contained"
-              tabIndex={- 1
-              }
+              tabIndex={-1}
               startIcon={< UploadFile />}
             >
               Load CSV
-              < VisuallyHiddenInput
-                type="file"
-                onChange={handleFileChange}
-                multiple
-              />
+              < FileInput onChange={handleFileChange} />
             </Button >
-            {/* </Container> */}
-
           </Box >
         )}
     </>
