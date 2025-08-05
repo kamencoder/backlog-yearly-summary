@@ -6,17 +6,19 @@ const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 
 export const useDataController = () => {
 
-  const [startingData, setStartingData] = useState<{ games: CsvData[], year: number }>();
+  const currentYear = (new Date()).getFullYear();
+  const [csvData, setCsvData] = useState<{ games: CsvData[] }>();
   const [userData, setUserData] = useState<UserData>({ ...initialUserData, gameEdits: { ...initialUserData.gameEdits } });
   const [baseSummary, setBaseSummary] = useState<Summary | null>(null);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
 
   useEffect(() => {
-    console.log('Creating summary from CSV data', { games: startingData?.games?.length });
-    if (startingData?.games && startingData.games.length > 0) {
-      const baseSummary = getYearSummary(startingData.games, startingData.year);
+    console.log('Creating summary from CSV data', { games: csvData?.games?.length });
+    if (csvData?.games && csvData.games.length > 0) {
+      const baseSummary = getYearSummary(csvData.games, selectedYear);
       setBaseSummary(baseSummary);
     }
-  }, [startingData]);
+  }, [csvData, selectedYear]);
 
 
   const summary = useMemo((): Summary | null => {
@@ -34,14 +36,12 @@ export const useDataController = () => {
 
   const data = useMemo<Data>((): Data => {
     return {
-      games: startingData?.games,
-      year: startingData?.year,
+      games: csvData?.games,
+      year: selectedYear,
       summary,
       userData,
     }
-  }, [startingData, summary])
-
-
+  }, [csvData, summary, selectedYear, userData]);
 
   useEffect(() => {
     if (userData) {
@@ -69,12 +69,13 @@ export const useDataController = () => {
 
   return {
     data,
-    initialize: (games: CsvData[], year: number) => {
-      console.log('Initializing data controller with games and year', { games, year });
-      setStartingData({ games, year });
+    initialize: (games: CsvData[]) => {
+      setCsvData({ games });
+    },
+    editYear: (year: number) => {
+      setSelectedYear(year);
     },
     editGame: (gameId: string, gameEdit: { coverImage: string | null }) => {
-      console.log('Editing game', { gameId, gameEdit });
       const newUserData = {
         ...userData,
         gameEdits: {

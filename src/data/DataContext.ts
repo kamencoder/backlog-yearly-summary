@@ -4,7 +4,7 @@ import type { Summary } from './summarizer';
 
 export interface Data {
   games?: CsvData[];
-  year?: number;
+  year: number;
   summary: Summary | null,
   userData: UserData,
 }
@@ -19,7 +19,8 @@ export interface GameEdit {
 
 export interface DataContextProps {
   data: Data;
-  initialize: (games: CsvData[], year: number) => void;
+  initialize: (games: CsvData[]) => void;
+  editYear: (year: number) => void;
   editGame: (gameId: string, gameEdit: GameEdit) => void;
 }
 
@@ -28,7 +29,9 @@ export interface CsvData {
 }
 
 const defaultContext: DataContextProps = {
-  data: {}
+  data: {
+    year: new Date().getFullYear(),
+  }
 } as DataContextProps;
 
 export const DataContext = React.createContext<DataContextProps>(defaultContext);

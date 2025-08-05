@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import Papa, { type ParseResult } from 'papaparse';
 import { type CsvData } from '../data/DataContext';
 import { DataContext } from '../data/DataContext';
@@ -21,7 +21,6 @@ const DataImporter = () => {
 
   const currentYear = (new Date()).getFullYear();
   const selectableYears = Array.from({ length: 10 }, (_x, i) => currentYear - i);
-  const [selectedYear, setSelectedYear] = useState(currentYear);
   const dataContext = useContext(DataContext);
   // const [ csvData, setCsvData ] = React.useState<CsvData[]>([]);
 
@@ -33,7 +32,7 @@ const DataImporter = () => {
         dynamicTyping: true,
         complete: (results: ParseResult<CsvData>) => {
           console.log("Parsed CSV data:", results.data);
-          dataContext.initialize(results.data, selectedYear);
+          dataContext.initialize(results.data);
           // setCsvData(results.data);
         },
         error: (error: unknown) => {
@@ -71,8 +70,8 @@ const DataImporter = () => {
             </Box >
             <Select
               label="Year"
-              value={selectedYear}
-              onChange={(e) => { setSelectedYear(parseInt(e.target.value?.toString() || "0", 10)) }}
+              value={dataContext.data.year}
+              onChange={(e) => { dataContext.editYear(parseInt(e.target.value?.toString() || "0", 10)) }}
               size="small"
               sx={{ marginBottom: "12px" }}
             >

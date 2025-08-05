@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
 import CsvImporter from './components/data-importer'
-import { type CsvData, type Data, DataContext, type GameEdit, type UserData } from './data/DataContext';
-import { getYearSummary, type Summary } from './data/summarizer';
+import { DataContext } from './data/DataContext';
 import YearSummary from './components/year-summary';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { Download, Photo } from '@mui/icons-material'
@@ -12,7 +10,7 @@ import { useDataController } from './data/use-data-controller';
 
 function App() {
 
-  const { data, initialize, editGame } = useDataController();
+  const { data, initialize, editGame, editYear } = useDataController();
 
   const darkTheme = createTheme({
     palette: {
@@ -48,12 +46,16 @@ function App() {
           value={{
             data,
             editGame,
+            editYear,
             initialize,
           }}>
           <>
-            <CsvImporter />
+
+            {!data.summary && (<CsvImporter />)}
             {data.summary && (
-              <YearSummary />
+              <>
+                <YearSummary />
+              </>
             )}
             {data.summary && (
               <Box margin={10} display={"flex"} justifyContent={"end"} gap={2}>
