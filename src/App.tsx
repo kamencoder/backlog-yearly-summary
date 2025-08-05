@@ -8,70 +8,11 @@ import { Download, Photo } from '@mui/icons-material'
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, Button } from '@mui/material';
 import html2canvas from 'html2canvas';
+import { useDataController } from './data/use-data-controller';
 
-const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 function App() {
 
-  // TODO: Move data context state into separate hook
-  const [startingData, setStartingData] = useState<{ games: CsvData[], year: number }>();
-  const [userData, setUserData] = useState<UserData>({ ...initialUserData, gameEdits: { ...initialUserData.gameEdits } });
-  const [baseSummary, setBaseSummary] = useState<Summary | null>(null);
-
-  useEffect(() => {
-    console.log('Creating summary from CSV data', { games: startingData?.games?.length });
-    if (startingData?.games && startingData.games.length > 0) {
-      const baseSummary = getYearSummary(startingData.games, startingData.year);
-      setBaseSummary(baseSummary);
-    }
-  }, [startingData]);
-
-
-  const summary = useMemo((): Summary | null => {
-    if (!baseSummary) {
-      return baseSummary;
-    }
-    return {
-      ...baseSummary,
-      games: baseSummary.games.map(g => ({
-        ...g,
-        ...userData.gameEdits?.[g.id],
-      }))
-    }
-  }, [baseSummary, userData])
-
-  const data = useMemo<Data>((): Data => {
-    return {
-      games: startingData?.games,
-      year: startingData?.year,
-      summary,
-      userData,
-    }
-  }, [startingData, summary])
-
-
-  const updateUserDataLocalStorage = () => {
-    if (!summary) return;
-    try {
-      console.log('Saving user data to local storage');
-      const currentUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
-      localStorage.setItem('user-data', JSON.stringify({
-        ...currentUserData,
-        ...userData,
-        gameEdits: {
-          ...currentUserData?.gameEdits,
-          ...userData?.gameEdits,
-        }
-      }))
-    } catch (err) {
-      console.error('Unable to save user-data to local storage', err);
-    }
-  }
-
-  useEffect(() => {
-    if (userData) {
-      updateUserDataLocalStorage();
-    }
-  }, [userData])
+  const { data, initialize, editGame } = useDataController();
 
   const darkTheme = createTheme({
     palette: {
@@ -106,35 +47,15 @@ function App() {
         <DataContext
           value={{
             data,
-            editGame: (gameId: string, gameEdit: GameEdit) => {
-              console.log('Game Edit saved', { gameId, gameEdit })
-              const newUserData = {
-                ...userData,
-                gameEdits: {
-                  ...data.userData?.gameEdits,
-                  [gameId]: {
-                    ...data.userData?.gameEdits[gameId],
-                    ...gameEdit
-                  }
-                }
-              }
-              console.log('New user data game info: ', newUserData.gameEdits[gameId])
-              setUserData(newUserData)
-            },
-            initialize: (games: CsvData[], year: number) => {
-              console.log('Initializing', { gameCount: games?.length, year });
-              setStartingData({
-                games,
-                year
-              })
-            }
+            editGame,
+            initialize,
           }}>
           <>
             <CsvImporter />
-            {summary && (
+            {data.summary && (
               <YearSummary />
             )}
-            {summary && (
+            {data.summary && (
               <Box margin={10} display={"flex"} justifyContent={"end"} gap={2}>
                 <Button
                   component="label"
