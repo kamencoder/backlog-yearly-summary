@@ -33,12 +33,17 @@ export type SummaryGroupWindow = typeof SummaryGroupWindowEnum[keyof typeof Summ
 export interface ReleaseDecadeTotal {
   decade: number;
   decadeLabel: string;
-  total: number;
+  totalGames: number;
+  totalTime: number; // minutes
 };
 export interface PlatformTotal {
   platform: string;
   platformAbbreviation: string;
-  total: number;
+  totalGames: number;
+  totalTime: number;
+  totalTimeHours: number;
+  percentOfTotalGames: number; // Optional, can be calculated later
+  percentOfTotalTime: number; // Optional, can be calculated later
 };
 
 const LengthGroupEnum = {
@@ -251,14 +256,22 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       }
 
       // Update platform totals
+      if (platform === 'Nintendo Gamecube') {
+        console.log('Scanning gamecube game:', title, 'with playtime:', playTime);
+      }
       const platformTotal = summary.platformTotals.find(pt => pt.platform === platform);
       if (platformTotal) {
-        platformTotal.total += 1;
+        platformTotal.totalGames += 1;
+        platformTotal.totalTime += playTime || 0;
       } else {
         summary.platformTotals.push({
           platform,
           platformAbbreviation,
-          total: 1
+          totalGames: 1,
+          totalTime: playTime || 0,
+          totalTimeHours: 0, // will be calculated later
+          percentOfTotalGames: 0, // will be calculated later
+          percentOfTotalTime: 0, // will be calculated later
         });
       }
 
@@ -276,12 +289,14 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       const decadeLabel = releaseDecade ? `${releaseDecade}s` : 'Unknown';
       const decadeTotal = summary.releaseDecadeTotals.find(yr => yr.decade === releaseDecade);
       if (decadeTotal) {
-        decadeTotal.total += 1;
+        decadeTotal.totalGames += 1;
+        decadeTotal.totalTime += playTime || 0;
       } else {
         summary.releaseDecadeTotals.push({
           decade: releaseDecade,
           decadeLabel,
-          total: 1
+          totalGames: 1,
+          totalTime: playTime || 0,
         });
       }
     }
@@ -322,6 +337,11 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
 
   // Sort platforms by name
   summary.platformTotals.sort((a, b) => a.platform.localeCompare(b.platform));
+  summary.platformTotals.forEach(pt => {
+    pt.totalTimeHours = getPlayTimeInHours(pt.totalTime, 2) || 0;
+    pt.percentOfTotalGames = Math.ceil((pt.totalGames / (summary.totalGamesBeaten + summary.totalGamesCompeleted)) * 100) || 0;
+    pt.percentOfTotalTime = Math.ceil((pt.totalTime / summary.totalTimeSpent) * 100) || 0;
+  });
 
   // Sort length groups by defined order
   summary.lengthGroupTotals.sort((a, b) => LengthGroupSorting[a.lengthGroup] - LengthGroupSorting[b.lengthGroup]);
@@ -342,7 +362,7 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     const startingDecade = (earliestDecade < earliestPossibleDecade ? earliestPossibleDecade : earliestDecade)
     for (let decade = startingDecade + 10; decade < latestDecade; decade += 10) {
       if (!summary.releaseDecadeTotals.find(d => d.decade === decade)) {
-        summary.releaseDecadeTotals.push({ decade, decadeLabel: `${decade}s`, total: 0 });
+        summary.releaseDecadeTotals.push({ decade, decadeLabel: `${decade}s`, totalGames: 0, totalTime: 0 });
       }
     }
   }

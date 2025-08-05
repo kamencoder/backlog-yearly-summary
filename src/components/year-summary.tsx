@@ -1,7 +1,7 @@
-import { useContext, useMemo } from 'react';
-import { getPlayTimeInHours, type PlatformTotal, type SummaryGameInfo } from '../data/summarizer';
-import { LineChart, PieChart, BarChart } from '@mui/x-charts';
-import { blue, green, red, yellow } from '@mui/material/colors'
+import { useContext, useMemo, useState } from 'react';
+import { getPlayTimeInHours, type SummaryGameInfo } from '../data/summarizer';
+import { LineChart, PieChart, BarChart, ChartContainer, BarPlot, LinePlot, ChartsXAxis, ChartsYAxis, ChartsTooltip } from '@mui/x-charts';
+import { blue, brown, green, grey, orange, pink, purple, red, yellow } from '@mui/material/colors'
 import {
   Box,
   Card,
@@ -21,6 +21,8 @@ import {
   TableHead,
   type Theme,
   Alert,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import { ExpandMore, Warning } from '@mui/icons-material'
 import { SingleStat } from './single-stat';
@@ -30,54 +32,57 @@ import { DataContext } from '../data/DataContext';
 import { AcquisitionGuage } from './acquisition-guage';
 import InfoIcon from './info-icon';
 
-type PlatformPieTotal = PlatformTotal & { otherPlatformDetails?: string[] };
+const decadeColors: Record<string, string> = {
+  1960: grey[500],
+  1970: brown[600],
+  1980: pink[500],
+  1990: orange[700],
+  2000: blue[500],
+  2010: yellow[700],
+  2020: green[500],
+  2030: purple[500],
+  2040: '#000000',
+}
 
 export const YearSummary = () => {
   const dataContext = useContext(DataContext);
   const { summary } = dataContext.data;
+  console.log('Year Summary decade totals: ', summary?.releaseDecadeTotals);
   if (!summary) {
     return null;
   }
 
-  const sortedPlatformsByTotal = useMemo(() => summary.platformTotals.sort((a, b) => b.total - a.total), [summary.platformTotals]);
-  console.log('PLATFORM TOTAL: ', sortedPlatformsByTotal.length)
-  const platforPie: PlatformPieTotal[] = useMemo(() => sortedPlatformsByTotal.reduce((acc: PlatformPieTotal[], platform: PlatformTotal) => {
-    if (platform.total === 1) {
-      const otherGroup = acc.find(p => p.platform === 'Other');
-      if (otherGroup) {
-        otherGroup.total += platform.total;
-        otherGroup.otherPlatformDetails = [...otherGroup.otherPlatformDetails || [], platform.platform];
-      } else {
-        acc.push({ platform: 'Other', platformAbbreviation: 'Other', total: platform.total, otherPlatformDetails: [platform.platform] });
-      }
-    } else {
-      acc.push(platform);
-    }
-    return acc;
-  }, [] as PlatformPieTotal[]), [sortedPlatformsByTotal]);
-
-  interface MonthSummary { gamesFinished: SummaryGameInfo[]; totalBeat: number; totalComplete: number; }
+  const sortedPlatformsByTotalGames = useMemo(() => summary.platformTotals.sort((a, b) => b.totalGames - a.totalGames), [summary.platformTotals]);
+  const sortedPlatformsByTotalTime = useMemo(() => [...summary.platformTotals].sort((a, b) => b.totalTime - a.totalTime), [summary.platformTotals]);
+  console.log('platforms by time: ', sortedPlatformsByTotalTime);
+  interface MonthSummary { gamesFinished: SummaryGameInfo[]; totalBeat: number; totalComplete: number; totalPlaytime: number; }
   const gamesByMonth = useMemo(() => {
     const monthData = summary.games?.reduce((acc: Record<string, MonthSummary>, game) => {
       if (Object.keys(acc).length === 0) {
         for (let i = 1; i <= 12; i++) {
           const month = DateTime.fromFormat(`2020-${i.toString().padStart(2, '0')}-01`, 'yyyy-MM-dd').monthLong || 'unknown';
-          acc[month] = { gamesFinished: [], totalBeat: 0, totalComplete: 0 };
+          acc[month] = { gamesFinished: [], totalBeat: 0, totalComplete: 0, totalPlaytime: 0 };
         }
       }
       if (game.completionMonth) {
-        // console.log('Adding game to month: ', { title: game.title, completion: game.completion, accTotalBeat: acc[game.completionMonth].totalBeat, accTotalComplete: acc[game.completionMonth].totalComplete })
+        const gameBeat = game.completion === "Beaten";
+        const gameComplete = game.completion === "Completed";
+        const gameFinished = gameBeat || gameComplete;
         acc[game.completionMonth].gamesFinished.push(game);
-        acc[game.completionMonth].totalBeat += (game.completion === "Beaten" ? 1 : 0);
-        acc[game.completionMonth].totalComplete += (game.completion === "Completed" ? 1 : 0);
+        acc[game.completionMonth].totalBeat += (gameBeat ? 1 : 0);
+        acc[game.completionMonth].totalComplete += (gameComplete ? 1 : 0);
+        acc[game.completionMonth].totalPlaytime += (gameFinished && game.playTime ? game.playTime : 0);
+
       }
       return acc;
     }, {} as Record<string, MonthSummary>) || {};
-    // console.log('Month Data: ', monthData)
     return monthData;
   }, [summary.games]);
 
   const totalTimeSpent = getPlayTimeInHours(summary.totalTimeSpent) || 0;
+
+  const [showPlatformTimeAndGamesCombined, setShowPlatformTimeAndGamesCombined] = useState(true);
+
 
   return (
     <Box sx={styles.yearSummaryContainer} id='year-summary-container'>
@@ -92,6 +97,7 @@ export const YearSummary = () => {
           You must fill in the "Completion Date" on your games in order for this tool to be able to tell that you finished them this year.
         </Alert>
       )}
+
       <Grid container spacing={3} >
         <Grid size={12}>
           <Card sx={{ width: "100%" }}>
@@ -100,7 +106,7 @@ export const YearSummary = () => {
                 justifyContent: "center",
                 alignItems: "center",
               }}>
-                <SingleStat value={summary.totalGamesBeaten + summary.totalGamesCompeleted} label="Games Finished" color={green[500]} />
+                <SingleStat value={summary.totalGamesBeaten + summary.totalGamesCompeleted} label="Games Finished" color={blue[500]} />
                 <SingleStat value={totalTimeSpent} label="Hours Played" color={yellow[700]} />
                 <SingleStat value={summary.acquisitions.totalAcquired} label="Games Acquired" color={red[500]} />
               </Stack>
@@ -112,43 +118,93 @@ export const YearSummary = () => {
             <CardContent>
               <Stack direction={"row"}>
                 <Typography flex={1} variant="h6" gutterBottom>Platform Totals</Typography>
+                <FormControlLabel control={
+                  <Switch
+                    size="small"
+                    checked={showPlatformTimeAndGamesCombined}
+                    onChange={(e => {
+                      setShowPlatformTimeAndGamesCombined(e.currentTarget.checked);
+                    })}
+                  />}
+                  label="combined"
+                />
                 <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
               </Stack>
+
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 8 }}>
+                {!showPlatformTimeAndGamesCombined && (
+                  <>
+                    <Grid size={{ md: 12, lg: 6 }}>
+                      <Box>
+                        <Typography style={{ textAlign: 'center' }}>Games Finished by Platform</Typography>
+                        <BarChart
+                          dataset={sortedPlatformsByTotalGames as any}
+                          yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
+                          xAxis={[{ label: "Games Finished" }]}
+                          series={[{ dataKey: 'totalGames', color: blue[500], label: 'Total Games Finished' }]}
+                          layout="horizontal"
+                          sx={{ height: `${25 * (sortedPlatformsByTotalGames.length < 8 ? 8 : sortedPlatformsByTotalGames.length)}px` }}
+                          hideLegend
+                        />
+                      </Box>
+                    </Grid>
+                    <Grid size={{ md: 12, lg: 6 }}>
+                      <Box>
+                        <Typography style={{ textAlign: 'center' }}>Time Spent by Platform</Typography>
+                        <BarChart
+                          dataset={sortedPlatformsByTotalTime as any}
+                          yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
+                          xAxis={[{ label: "Time Spent" }]}
+                          series={[{
+                            dataKey: 'totalTimeHours', color: yellow[700],
+                            label: 'Total Time (hrs)',
+                          }]}
+                          layout="horizontal"
+                          sx={{ height: `${25 * (sortedPlatformsByTotalTime.length < 8 ? 8 : sortedPlatformsByTotalTime.length)}px` }}
+                          hideLegend
+                        />
+                      </Box>
+                    </Grid>
+                  </>
+                )}
+                {showPlatformTimeAndGamesCombined && (
+
                   <BarChart
-                    dataset={sortedPlatformsByTotal as any}
-                    yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
-                    xAxis={[{ label: "Games Finished" }]}
-                    series={[{ dataKey: 'total' }]}
-                    layout="horizontal"
-                    sx={{ height: `${25 * (sortedPlatformsByTotal.length < 8 ? 8 : sortedPlatformsByTotal.length)}px` }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <PieChart
+                    dataset={sortedPlatformsByTotalTime as any}
+                    slotProps={{
+
+                    }}
+                    yAxis={[{
+                      dataKey: 'platformAbbreviation',
+                      scaleType: 'band', width: 80,
+                    }]}
+                    xAxis={[
+                      {
+                        label: "% of Total", id: 'totalGamesAxis',
+                        valueFormatter: (value: any) => `${value}%`
+                      },
+                      { label: "Time Spent", id: 'totalTimeAxis' },
+                    ]}
                     series={[
                       {
-                        data: platforPie.map(p => ({
-                          id: p.platform,
-                          label: `${p.platformAbbreviation} (${p.total})`,
-                          value: p.total
-                        })),
-                        arcLabel: (params) => params.label?.replace(/\(.+\)/, '') ?? '',
-                        arcLabelMinAngle: 20,
-                        arcLabelRadius: "80%"
+                        dataKey: 'percentOfTotalGames', xAxisId: 'totalGamesAxis',
+                        label: "% of Total Finished", color: blue[500],
+                        valueFormatter: (x) => `${x}%`,
+                      },
+                      {
+                        dataKey: 'percentOfTotalTime', xAxisId: 'totalTimeAxis',
+                        label: "% of Total Time", color: yellow[700],
+                        valueFormatter: (x) => `${x}%`,
                       },
                     ]}
-                    slotProps={{
-                      legend: {
-                        direction: 'horizontal',
-                        position: { vertical: 'bottom', horizontal: 'center' }
-                      }
-                    }}
-                    height={300}
+                    layout="horizontal"
+                    sx={{ height: `${32 * (sortedPlatformsByTotalTime.length < 8 ? 8 : sortedPlatformsByTotalTime.length)}px` }}
                   />
-                </Grid>
+
+                )}
               </Grid>
+
+
             </CardContent>
           </Card>
         </Grid>
@@ -164,11 +220,11 @@ export const YearSummary = () => {
                 dataset={summary.lengthGroupTotals as any}
                 xAxis={[{ dataKey: 'lengthGroup', scaleType: 'band', label: "Game Length by playtime" }]}
                 yAxis={[
-                  { id: 'totalGames', scaleType: 'linear', position: 'left', label: 'Games Finished', labelStyle: { fill: green[500], fontSize: "16px" } },
-                  { id: 'totalTime', scaleType: 'linear', position: 'right', label: 'Total Time Spent (hrs)', labelStyle: { fill: yellow[800], fontSize: "16px" } },
+                  { id: 'totalGames', scaleType: 'linear', position: 'left', label: 'Games Finished', labelStyle: { fill: blue[500], fontSize: "16px" } },
+                  { id: 'totalTime', scaleType: 'linear', position: 'right', label: 'Total Time Spent (hrs)', labelStyle: { fill: yellow[700], fontSize: "16px" } },
                 ]}
                 series={[
-                  { dataKey: 'totalGames', yAxisId: 'totalGames', label: 'Games Finished', color: green[500] },
+                  { dataKey: 'totalGames', yAxisId: 'totalGames', label: 'Games Finished', color: blue[500] },
                   { dataKey: 'totalTimeSpent', yAxisId: 'totalTime', label: 'Total Time (hrs)', color: yellow[700] }
                 ]}
                 height={250}
@@ -184,38 +240,60 @@ export const YearSummary = () => {
                 <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
               </Stack>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 8 }}>
-                  <BarChart
-                    title="Release Decade Totals"
-                    dataset={summary.releaseDecadeTotals as any}
-                    xAxis={[{ dataKey: 'decadeLabel', scaleType: 'band', label: "Release Decade" }]}
-                    yAxis={[{ label: "Games Finished" }]}
-                    series={[{ dataKey: 'total' }]}
-                    height={250}
-                  />
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Box>
+                    <Typography style={{ textAlign: 'center' }}>Games Finished by Decade</Typography>
+                    <PieChart
+                      title='Games Finished Per Decade'
+                      series={[
+                        {
+                          data: summary.releaseDecadeTotals.map(x => ({
+                            id: x.decadeLabel,
+                            label: x.decadeLabel,
+                            value: x.totalGames,
+                            color: decadeColors[x.decade],
+                          })),
+                          valueFormatter: (x) => `${x.value} games finished`,
+                          arcLabel: (params) => params.label || '',
+                          arcLabelMinAngle: 20,
+                          arcLabelRadius: "60%"
+                        },
+                      ]}
+                      // hideLegend                      
+                      slotProps={{
+                        legend: {
+                          direction: 'horizontal',
+                          position: { vertical: 'bottom', horizontal: 'center' }
+                        }
+                      }}
+                      height={240}
+                    />
+                  </Box>
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <PieChart
-                    series={[
-                      {
-                        data: summary.releaseDecadeTotals.map(x => ({
-                          id: x.decadeLabel,
-                          label: x.decadeLabel,
-                          value: x.total
-                        })),
-                        arcLabel: (params) => params.label || '',
-                        arcLabelMinAngle: 20,
-                        arcLabelRadius: "80%"
-                      },
-                    ]}
-                    slotProps={{
-                      legend: {
-                        direction: 'horizontal',
-                        position: { vertical: 'bottom', horizontal: 'center' }
-                      }
-                    }}
-                    height={300}
-                  />
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Box>
+                    <Typography style={{ textAlign: 'center' }}>Time Played by Decade</Typography>
+                    <PieChart
+                      title='Time Played Per Decade'
+                      series={[
+                        {
+                          data: summary.releaseDecadeTotals.map(x => ({
+                            id: x.decadeLabel,
+                            label: x.decadeLabel,
+                            value: getPlayTimeInHours(x.totalTime) || 0,
+                            color: decadeColors[x.decade],
+                          })),
+                          valueFormatter: (x) => `${x.value} hrs played`,
+                          arcLabel: (params) => params.label || '',
+                          arcLabelMinAngle: 20,
+                          arcLabelRadius: "60%"
+                        },
+                      ]}
+
+                      hideLegend
+                      height={240}
+                    />
+                  </Box>
                 </Grid>
               </Grid>
             </CardContent>
@@ -293,7 +371,8 @@ export const YearSummary = () => {
                 <Typography flex={1} variant="h6" gutterBottom>Completion by month</Typography>
                 <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
               </Stack>
-              <BarChart
+              <ChartContainer
+                // <BarChart
                 sx={{ minHeight: '300px' }}
                 height={240}
                 dataset={Object.keys(gamesByMonth)
@@ -301,13 +380,29 @@ export const YearSummary = () => {
                     return {
                       month: monthName,
                       totalBeat: gamesByMonth[monthName].totalBeat,
-                      totalComplete: gamesByMonth[monthName].totalComplete
+                      totalComplete: gamesByMonth[monthName].totalComplete,
+                      totalPlaytime: getPlayTimeInHours(gamesByMonth[monthName].totalPlaytime)
                     }
                   }) as any}
-                xAxis={[{ dataKey: 'month', scaleType: 'band' }]}
-                yAxis={[{ label: "Games Finished" }]}
-                series={[{ dataKey: 'totalBeat', stack: 'month', color: green[500], label: 'Beat' }, { dataKey: 'totalComplete', stack: 'month', color: blue[500], label: 'Complete' }]}
-              />
+                xAxis={[{ dataKey: 'month', scaleType: 'band', id: 'monthAxis' }]}
+                yAxis={[
+                  { id: 'beatCompleteAxis', scaleType: 'linear', position: 'left', label: 'Games Finished' },
+                  { id: 'playtimeAxis', scaleType: 'linear', position: 'right', label: 'Playtime (hrs)' }
+                ]}
+                // yAxis={[{ label: "Games Finished" }]}
+                series={[
+                  { type: 'bar', dataKey: 'totalBeat', stack: 'month', color: green[500], label: 'Beat', yAxisId: 'beatCompleteAxis' },
+                  { type: 'bar', dataKey: 'totalComplete', stack: 'month', color: blue[500], label: 'Complete', yAxisId: 'beatCompleteAxis' },
+                  { type: 'line', dataKey: 'totalPlaytime', stack: 'other', color: yellow[500], label: 'Playtime (hrs)', yAxisId: 'playtimeAxis' },
+                ]}
+              >
+                <BarPlot />
+                <LinePlot />
+                <ChartsXAxis axisId="monthAxis" />
+                <ChartsYAxis axisId="beatCompleteAxis" />
+                <ChartsYAxis axisId="playtimeAxis" />
+                <ChartsTooltip />
+              </ChartContainer>
             </CardContent>
           </Card>
         </Grid>
