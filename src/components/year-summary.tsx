@@ -47,14 +47,13 @@ const decadeColors: Record<string, string> = {
 export const YearSummary = () => {
   const dataContext = useContext(DataContext);
   const { summary } = dataContext.data;
-  console.log('Year Summary decade totals: ', summary?.releaseDecadeTotals);
   if (!summary) {
     return null;
   }
 
   const sortedPlatformsByTotalGames = useMemo(() => summary.platformTotals.sort((a, b) => b.totalGames - a.totalGames), [summary.platformTotals]);
   const sortedPlatformsByTotalTime = useMemo(() => [...summary.platformTotals].sort((a, b) => b.totalTime - a.totalTime), [summary.platformTotals]);
-  console.log('platforms by time: ', sortedPlatformsByTotalTime);
+
   interface MonthSummary { gamesFinished: SummaryGameInfo[]; totalBeat: number; totalComplete: number; totalPlaytime: number; }
   const gamesByMonth = useMemo(() => {
     const monthData = summary.games?.reduce((acc: Record<string, MonthSummary>, game) => {
@@ -72,7 +71,6 @@ export const YearSummary = () => {
         acc[game.completionMonth].totalBeat += (gameBeat ? 1 : 0);
         acc[game.completionMonth].totalComplete += (gameComplete ? 1 : 0);
         acc[game.completionMonth].totalPlaytime += (gameFinished && game.playTime ? game.playTime : 0);
-
       }
       return acc;
     }, {} as Record<string, MonthSummary>) || {};
@@ -82,7 +80,6 @@ export const YearSummary = () => {
   const totalTimeSpent = getPlayTimeInHours(summary.totalTimeSpent) || 0;
 
   const [showPlatformTimeAndGamesCombined, setShowPlatformTimeAndGamesCombined] = useState(true);
-
 
   return (
     <Box sx={styles.yearSummaryContainer} id='year-summary-container'>

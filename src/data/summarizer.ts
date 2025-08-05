@@ -256,9 +256,6 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       }
 
       // Update platform totals
-      if (platform === 'Nintendo Gamecube') {
-        console.log('Scanning gamecube game:', title, 'with playtime:', playTime);
-      }
       const platformTotal = summary.platformTotals.find(pt => pt.platform === platform);
       if (platformTotal) {
         platformTotal.totalGames += 1;

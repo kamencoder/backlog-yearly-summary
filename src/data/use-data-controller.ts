@@ -13,7 +13,6 @@ export const useDataController = () => {
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
   useEffect(() => {
-    console.log('Creating summary from CSV data', { games: csvData?.games?.length });
     if (csvData?.games && csvData.games.length > 0) {
       const baseSummary = getYearSummary(csvData.games, selectedYear);
       setBaseSummary(baseSummary);
@@ -52,7 +51,6 @@ export const useDataController = () => {
   const updateUserDataLocalStorage = () => {
     if (!summary) return;
     try {
-      console.log('Saving user data to local storage');
       const currentUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
       localStorage.setItem('user-data', JSON.stringify({
         ...currentUserData,
