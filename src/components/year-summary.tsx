@@ -114,7 +114,7 @@ export const YearSummary = () => {
           <Card variant="outlined" sx={{ width: "100%" }}>
             <CardContent>
               <Stack direction={"row"}>
-                <Typography flex={1} variant="h6" gutterBottom>Platform Totals</Typography>
+                <Typography flex={1} variant="h6" gutterBottom>Platforms</Typography>
                 <FormControlLabel control={
                   <Switch
                     size="small"
@@ -233,7 +233,7 @@ export const YearSummary = () => {
           <Card variant="outlined">
             <CardContent>
               <Stack direction={"row"}>
-                <Typography flex={1} variant="h6" gutterBottom>Release Decade Totals</Typography>
+                <Typography flex={1} variant="h6" gutterBottom>Decades</Typography>
                 <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
               </Stack>
               <Grid container spacing={2}>
@@ -301,7 +301,7 @@ export const YearSummary = () => {
           <Card variant="outlined">
             <CardContent>
               <Stack direction={"row"}>
-                <Typography flex={1} variant="h6" gutterBottom>Added to the Backlog</Typography>
+                <Typography flex={1} variant="h6" gutterBottom>Backlog Additions</Typography>
                 <InfoIcon text="Includes games acquired within this year based on the Acquisition Date set on the game in IB. The number of games played includes total number of games among those acquired this year which are marked as playing or played. The number of games finished includes total number of those acquired this year which are marked beaten or completed." />
               </Stack>
               {!summary.acquisitions.totalAcquired && (

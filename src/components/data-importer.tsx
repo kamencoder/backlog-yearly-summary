@@ -74,13 +74,13 @@ const DataImporter = () => {
             <Box sx={{ alignItems: "left" }} >
               <List >
                 <ListItem>
-                  <Typography variant='body2'>1. Navigate to <Link href="https://infinitebacklog.net/settings/export">Infinite Backlog Export Page</Link></Typography>
+                  <Typography variant='body2'>1. Navigate to <Link href="https://infinitebacklog.net/settings/export" target="_blank" rel="noreferrer">Infinite Backlog Export Page</Link></Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography variant='body2'>2. Export "Game Collection" to a CSV file</Typography>
+                  <Typography variant='body2'>2. Click "Export Collection" to get a CSV file</Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography variant='body2'>3. Click Load CSV here and import the file</Typography>
+                  <Typography variant='body2'>3. Click Load CSV here and import the CSV file</Typography>
                 </ListItem>
               </List>
             </Box >
