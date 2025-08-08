@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, Typography } from '@mui/material';
 import { DataContext } from '../data/DataContext';
-import { Print, Image } from '@mui/icons-material';
+import { Print, Image, BugReport } from '@mui/icons-material';
 import html2canvas from 'html2canvas';
 // import { parseFile, FileInput } from './data-importer';
 
@@ -117,6 +117,14 @@ export default function AppBar() {
                   <Print />
                 </ListItemIcon>
                 <ListItemText primary="Print PDF" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem sx={{ justifySelf: 'end' }} disablePadding>
+              <ListItemButton onClick={() => window.open('https://github.com/kamencoder/backlog-yearly-summary/issues', '_blank')}>
+                <ListItemIcon>
+                  <BugReport />
+                </ListItemIcon>
+                <ListItemText primary="Report Bug" />
               </ListItemButton>
             </ListItem>
           </List>
