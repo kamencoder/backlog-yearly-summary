@@ -205,39 +205,50 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     const releaseYear = (releaseDate && releaseDate.isValid) ? releaseDate.year : null;
     const releaseDecade = releaseYear ? getDecadeFromYear(releaseYear) : 0;
     const completion = game['Completion']?.toString() || 'Unknown';
-    const status = game['Status']?.toString() || 'Unknown';
+    let status = game['Status']?.toString() || 'Unknown';
     let acquisitionDateRaw = game['Acquisition date']?.toString();
 
-    const completionDateRaw = game['Completion date']?.toString();
-    const completionDate = completionDateRaw ? DateTime.fromISO(completionDateRaw, { setZone: true }) : null;
-    const completionYear = completionDate?.year;
+    let completionDateRaw = game['Completion date']?.toString();
     const playTime = game['Playtime'] ? parseInt(game['Playtime'].toString()) : null
     const type = game['Type']?.toString(); // (Bundled Game)
     const coverImage = game['Cover']?.toString() || null;
     const ratingRaw = game['Rating (Score)']?.toString();
     const rating = ratingRaw ? parseFloat(ratingRaw) / 2 : null; // comes in as 10 point raiting, need 
 
-    if (status === 'No Status') {
-      return; // Skip no status
-    }
-    const isBundleParent = nextGame?.['Type']?.toString() === 'Bundled Game';
+    const isBundleParent = type !== 'Bundled Game' && nextGame?.['Type']?.toString() === 'Bundled Game';
     if (isBundleParent) {
       return; // Skip parent
     }
 
     const isBundleChild = type === 'Bundled Game';
     if (isBundleChild) {
+      if (!status) { // There is no status for bundled child games, derive from completion value if possible.
+        if (completion === 'Beaten' || completion === 'Completed' || completion === 'Continuous' || completion === 'Dropped' || completion === 'Unfinished') {
+          status = 'Played';
+        }
+      }
       // Currently for game bundles, the parent game will have a record and all games that are part of that bundle will be right after it. 
       const parentGame = getBundleParentGame(games, i);
       if (parentGame) {
         platform = platform || parentGame?.['Platform']?.toString();
+        completionDateRaw = completionDateRaw || parentGame?.['Completion date']?.toString();
         acquisitionDateRaw = acquisitionDateRaw || parentGame?.['Acquisition date']?.toString();
+        status = status || parentGame?.['Status']?.toString() || '';
+      } else {
+        console.warn(`Bundle child game ${title} has no parent game`);
       }
+
     }
     if (!platform) {
       platform = 'Unknown'; // Set to unknown if we still don't have a platform.
     }
 
+    if (status === 'No Status') {
+      return; // Skip no status
+    }
+
+    const completionDate = completionDateRaw ? DateTime.fromISO(completionDateRaw, { setZone: true }) : null;
+    const completionYear = completionDate?.year;
     const acquisitionDate = acquisitionDateRaw ? DateTime.fromISO(acquisitionDateRaw, { setZone: true }) : null;
     const acquisitionYear = acquisitionDate?.year
     const platformAbbreviation = platforms.find(p => p.name === platform)?.abbreviation || platform;
