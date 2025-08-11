@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Modal, Box, Typography, FormGroup, FormControlLabel, Checkbox, Button } from '@mui/material';
-import { DataContext } from '../data/DataContext';
+import { DataContext } from '../data/data-context';
 
 const modalStyle = {
   position: 'absolute' as const,

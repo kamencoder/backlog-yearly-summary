@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, Typography } from '@mui/material';
-import { DataContext } from '../data/DataContext';
+import { DataContext } from '../data/data-context';
 import { Print, Image, BugReport, Settings } from '@mui/icons-material';
 import html2canvas from 'html2canvas';
 import SettingsModal from './settings-modal';

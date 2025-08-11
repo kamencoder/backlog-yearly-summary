@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getYearSummary, type Summary } from "./summarizer";
-import { defaultContext, type CsvData, type Data, type UserData, type ViewSettings } from "./DataContext";
+import { defaultContext, type CsvData, type Data, type UserData, type ViewSettings } from "./data-context";
 
 const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 

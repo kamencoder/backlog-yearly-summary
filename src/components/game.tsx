@@ -2,7 +2,7 @@ import { Box, Button, Card, CardContent, CardMedia, IconButton, Menu, MenuItem, 
 import { getPlayTimeInHours, type SummaryGameInfo } from "../data/summarizer";
 import { MoreVert, Search } from "@mui/icons-material";
 import { useContext, useState } from "react";
-import { DataContext, type GameEdit } from "../data/DataContext";
+import { DataContext, type GameEdit } from "../data/data-context";
 
 export interface GameProps {
   game: SummaryGameInfo;

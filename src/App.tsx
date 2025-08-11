@@ -1,6 +1,6 @@
-import CsvImporter from './components/data-importer'
-import { DataContext } from './data/DataContext';
-import YearSummary from './components/year-summary';
+import CsvImporter from './views/landing/landing-view'
+import { DataContext } from './data/data-context';
+import YearSummary from './views/summary/year-summary-view';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useDataController } from './data/use-data-controller';

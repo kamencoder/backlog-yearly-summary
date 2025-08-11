@@ -1,4 +1,4 @@
-import type { CsvData } from "./DataContext";
+import type { CsvData } from "./data-context";
 import { DateTime } from "luxon";
 import { platforms } from "./platforms";
 
@@ -161,6 +161,7 @@ const getLengthGroupByTimePlayed = (timePlayed: number | null): LengthGroup => {
 }
 
 export const getYearSummary = (games: CsvData[], year: number): Summary => {
+  console.log('Generating year summary for year:', year);
   const summary: Summary = {
     year,
     platformTotals: [],
@@ -347,8 +348,16 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
   summary.platformTotals.sort((a, b) => a.platform.localeCompare(b.platform));
   summary.platformTotals.forEach(pt => {
     pt.totalTimeHours = getPlayTimeInHours(pt.totalTime, 2) || 0;
-    pt.percentOfTotalGames = Math.ceil((pt.totalGames / (summary.totalGamesBeaten + summary.totalGamesCompeleted)) * 100) || 0;
-    pt.percentOfTotalTime = Math.ceil((pt.totalTime / summary.totalTimeSpent) * 100) || 0;
+    if (summary.totalGamesBeaten + summary.totalGamesCompeleted > 0) {
+      pt.percentOfTotalGames = Math.ceil((pt.totalGames / (summary.totalGamesBeaten + summary.totalGamesCompeleted)) * 100) || 0;
+    } else {
+      pt.percentOfTotalGames = 0;
+    }
+    if (summary.totalTimeSpent > 0) {
+      pt.percentOfTotalTime = Math.ceil((pt.totalTime / summary.totalTimeSpent) * 100) || 0;
+    } else {
+      pt.percentOfTotalGames = 0;
+    }
   });
 
   // Sort length groups by defined order
