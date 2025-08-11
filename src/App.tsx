@@ -8,7 +8,7 @@ import AppBar from './components/app-bar';
 
 function App() {
 
-  const { data, initialize, editGame, editYear } = useDataController();
+  const { data, initialize, editGame, editYear, editViewSettings } = useDataController();
 
   const darkTheme = createTheme({
     palette: {
@@ -25,6 +25,7 @@ function App() {
             data,
             editGame,
             editYear,
+            editViewSettings,
             initialize,
           }}>
           <>

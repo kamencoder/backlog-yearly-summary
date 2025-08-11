@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getYearSummary, type Summary } from "./summarizer";
-import type { CsvData, Data, UserData } from "./DataContext";
+import { defaultContext, type CsvData, type Data, type UserData, type ViewSettings } from "./DataContext";
 
 const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 
@@ -8,7 +8,7 @@ export const useDataController = () => {
 
   const currentYear = (new Date()).getFullYear();
   const [csvData, setCsvData] = useState<{ games: CsvData[] }>();
-  const [userData, setUserData] = useState<UserData>({ ...initialUserData, gameEdits: { ...initialUserData.gameEdits } });
+  const [userData, setUserData] = useState<UserData>({ ...defaultContext.data.userData, ...initialUserData, gameEdits: { ...initialUserData.gameEdits } });
   const [baseSummary, setBaseSummary] = useState<Summary | null>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
@@ -81,6 +81,20 @@ export const useDataController = () => {
           [gameId]: {
             ...userData.gameEdits[gameId],
             ...gameEdit
+          }
+        }
+      }
+      setUserData(newUserData);
+    },
+    editViewSettings: (settings: Partial<ViewSettings>) => {
+      const newUserData = {
+        ...userData,
+        viewSettings: {
+          ...userData.viewSettings,
+          ...settings,
+          sectionVisibility: {
+            ...userData.viewSettings.sectionVisibility,
+            ...settings.sectionVisibility,
           }
         }
       }

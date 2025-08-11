@@ -46,7 +46,8 @@ const decadeColors: Record<string, string> = {
 
 export const YearSummary = () => {
   const dataContext = useContext(DataContext);
-  const { summary } = dataContext.data;
+  const { summary, userData } = dataContext.data;
+  const { viewSettings } = userData;
   if (!summary) {
     return null;
   }
@@ -104,13 +105,13 @@ export const YearSummary = () => {
                 alignItems: "center",
               }}>
                 <SingleStat value={summary.totalGamesBeaten + summary.totalGamesCompeleted} label="Games Finished" color={blue[500]} />
-                <SingleStat value={totalTimeSpent} label="Hours Played" color={yellow[700]} />
-                <SingleStat value={summary.acquisitions.totalAcquired} label="Games Acquired" color={red[500]} />
+                {viewSettings.showPlaytimeStats && <SingleStat value={totalTimeSpent} label="Hours Played" color={yellow[700]} />}
+                {viewSettings.showAcquisitionStats && <SingleStat value={summary.acquisitions.totalAcquired} label="Games Acquired" color={red[500]} />}
               </Stack>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={12} container>
+        {viewSettings.sectionVisibility.showPlatformSection && <Grid size={12} container>
           <Card variant="outlined" sx={{ width: "100%" }}>
             <CardContent>
               <Stack direction={"row"}>
@@ -129,7 +130,7 @@ export const YearSummary = () => {
               </Stack>
 
               <Grid container spacing={2}>
-                {!showPlatformTimeAndGamesCombined && (
+                {(!showPlatformTimeAndGamesCombined) && (
                   <>
                     <Grid size={{ md: 12, lg: 6 }}>
                       <Box>
@@ -145,23 +146,25 @@ export const YearSummary = () => {
                         />
                       </Box>
                     </Grid>
-                    <Grid size={{ md: 12, lg: 6 }}>
-                      <Box>
-                        <Typography style={{ textAlign: 'center' }}>Time Spent by Platform</Typography>
-                        <BarChart
-                          dataset={sortedPlatformsByTotalTime as any}
-                          yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
-                          xAxis={[{ label: "Time Spent" }]}
-                          series={[{
-                            dataKey: 'totalTimeHours', color: yellow[700],
-                            label: 'Total Time (hrs)',
-                          }]}
-                          layout="horizontal"
-                          sx={{ height: `${25 * (sortedPlatformsByTotalTime.length < 8 ? 8 : sortedPlatformsByTotalTime.length)}px` }}
-                          hideLegend
-                        />
-                      </Box>
-                    </Grid>
+                    {viewSettings.showPlaytimeStats && (
+                      <Grid size={{ md: 12, lg: 6 }}>
+                        <Box>
+                          <Typography style={{ textAlign: 'center' }}>Time Spent by Platform</Typography>
+                          <BarChart
+                            dataset={sortedPlatformsByTotalTime as any}
+                            yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
+                            xAxis={[{ label: "Time Spent" }]}
+                            series={[{
+                              dataKey: 'totalTimeHours', color: yellow[700],
+                              label: 'Total Time (hrs)',
+                            }]}
+                            layout="horizontal"
+                            sx={{ height: `${25 * (sortedPlatformsByTotalTime.length < 8 ? 8 : sortedPlatformsByTotalTime.length)}px` }}
+                            hideLegend
+                          />
+                        </Box>
+                      </Grid>
+                    )}
                   </>
                 )}
                 {showPlatformTimeAndGamesCombined && (
@@ -200,12 +203,11 @@ export const YearSummary = () => {
 
                 )}
               </Grid>
-
-
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={12}>
+        }
+        {viewSettings.sectionVisibility.showGameLengthSection && viewSettings.showPlaytimeStats && (<Grid size={12}>
           <Card variant="outlined">
             <CardContent>
               <Stack direction={"row"}>
@@ -229,75 +231,79 @@ export const YearSummary = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={12}>
-          <Card variant="outlined">
-            <CardContent>
-              <Stack direction={"row"}>
-                <Typography flex={1} variant="h6" gutterBottom>Decades</Typography>
-                <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
-              </Stack>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Box>
-                    <Typography style={{ textAlign: 'center' }}>Games Finished by Decade</Typography>
-                    <PieChart
-                      title='Games Finished Per Decade'
-                      series={[
-                        {
-                          data: summary.releaseDecadeTotals.map(x => ({
-                            id: x.decadeLabel,
-                            label: x.decadeLabel,
-                            value: x.totalGames,
-                            color: decadeColors[x.decade],
-                          })),
-                          valueFormatter: (x) => `${x.value} games finished`,
-                          arcLabel: (params) => params.label || '',
-                          arcLabelMinAngle: 20,
-                          arcLabelRadius: "60%"
-                        },
-                      ]}
-                      // hideLegend                      
-                      slotProps={{
-                        legend: {
-                          direction: 'horizontal',
-                          position: { vertical: 'bottom', horizontal: 'center' }
-                        }
-                      }}
-                      height={240}
-                    />
-                  </Box>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Box>
-                    <Typography style={{ textAlign: 'center' }}>Time Played by Decade</Typography>
-                    <PieChart
-                      title='Time Played Per Decade'
-                      series={[
-                        {
-                          data: summary.releaseDecadeTotals.map(x => ({
-                            id: x.decadeLabel,
-                            label: x.decadeLabel,
-                            value: getPlayTimeInHours(x.totalTime) || 0,
-                            color: decadeColors[x.decade],
-                          })),
-                          valueFormatter: (x) => `${x.value} hrs played`,
-                          arcLabel: (params) => params.label || '',
-                          arcLabelMinAngle: 20,
-                          arcLabelRadius: "60%"
-                        },
-                      ]}
+        )}
+        {viewSettings.sectionVisibility.showDecadeSection && (
+          <Grid size={12}>
+            <Card variant="outlined">
+              <CardContent>
+                <Stack direction={"row"}>
+                  <Typography flex={1} variant="h6" gutterBottom>Decades</Typography>
+                  <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+                </Stack>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Box>
+                      <Typography style={{ textAlign: 'center' }}>Games Finished by Decade</Typography>
+                      <PieChart
+                        title='Games Finished Per Decade'
+                        series={[
+                          {
+                            data: summary.releaseDecadeTotals.map(x => ({
+                              id: x.decadeLabel,
+                              label: x.decadeLabel,
+                              value: x.totalGames,
+                              color: decadeColors[x.decade],
+                            })),
+                            valueFormatter: (x) => `${x.value} games finished`,
+                            arcLabel: (params) => params.label || '',
+                            arcLabelMinAngle: 20,
+                            arcLabelRadius: "60%"
+                          },
+                        ]}
+                        // hideLegend                      
+                        slotProps={{
+                          legend: {
+                            direction: 'horizontal',
+                            position: { vertical: 'bottom', horizontal: 'center' }
+                          }
+                        }}
+                        height={240}
+                      />
+                    </Box>
+                  </Grid>
+                  {viewSettings.showPlaytimeStats && (
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Box>
+                        <Typography style={{ textAlign: 'center' }}>Time Played by Decade</Typography>
+                        <PieChart
+                          title='Time Played Per Decade'
+                          series={[
+                            {
+                              data: summary.releaseDecadeTotals.map(x => ({
+                                id: x.decadeLabel,
+                                label: x.decadeLabel,
+                                value: getPlayTimeInHours(x.totalTime) || 0,
+                                color: decadeColors[x.decade],
+                              })),
+                              valueFormatter: (x) => `${x.value} hrs played`,
+                              arcLabel: (params) => params.label || '',
+                              arcLabelMinAngle: 20,
+                              arcLabelRadius: "60%"
+                            },
+                          ]}
 
-                      hideLegend
-                      height={240}
-                    />
-                  </Box>
+                          hideLegend
+                          height={240}
+                        />
+                      </Box>
+                    </Grid>
+                  )}
                 </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={12}>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+        {viewSettings.showAcquisitionStats && (<Grid size={12}>
           <Card variant="outlined">
             <CardContent>
               <Stack direction={"row"}>
@@ -360,62 +366,66 @@ export const YearSummary = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Typography variant="h3" sx={{ textAlign: { sm: 'center' } }} gutterBottom>Monthly Detail</Typography>
-        <Grid size={12} container>
-          <Card variant="outlined" sx={{ width: "100%" }}>
-            <CardContent>
-              <Stack direction={"row"}>
-                <Typography flex={1} variant="h6" gutterBottom>Completion by month</Typography>
-                <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
-              </Stack>
-              <ChartContainer
-                // <BarChart
-                sx={{ minHeight: '300px' }}
-                height={240}
-                dataset={Object.keys(gamesByMonth)
-                  .map(monthName => {
-                    return {
-                      month: monthName,
-                      totalBeat: gamesByMonth[monthName].totalBeat,
-                      totalComplete: gamesByMonth[monthName].totalComplete,
-                      totalPlaytime: getPlayTimeInHours(gamesByMonth[monthName].totalPlaytime)
-                    }
-                  }) as any}
-                xAxis={[{ dataKey: 'month', scaleType: 'band', id: 'monthAxis' }]}
-                yAxis={[
-                  { id: 'beatCompleteAxis', scaleType: 'linear', position: 'left', label: 'Games Finished' },
-                  { id: 'playtimeAxis', scaleType: 'linear', position: 'right', label: 'Playtime (hrs)' }
-                ]}
-                // yAxis={[{ label: "Games Finished" }]}
-                series={[
-                  { type: 'bar', dataKey: 'totalBeat', stack: 'month', color: green[500], label: 'Beat', yAxisId: 'beatCompleteAxis' },
-                  { type: 'bar', dataKey: 'totalComplete', stack: 'month', color: blue[500], label: 'Complete', yAxisId: 'beatCompleteAxis' },
-                  { type: 'line', dataKey: 'totalPlaytime', stack: 'other', color: yellow[500], label: 'Playtime (hrs)', yAxisId: 'playtimeAxis' },
-                ]}
-              >
-                <BarPlot />
-                <LinePlot />
-                <ChartsXAxis axisId="monthAxis" />
-                <ChartsYAxis axisId="beatCompleteAxis" />
-                <ChartsYAxis axisId="playtimeAxis" />
-                <ChartsTooltip />
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={12}>
-          {gamesByMonth && Object.keys(gamesByMonth).map(month => (
-            <Card variant="outlined" sx={{ marginBottom: '6px' }} key={month} >
+        )}
+        {viewSettings.sectionVisibility.showMonthlyOverview && (
+          <Grid size={12} container>
+            <Card variant="outlined" sx={{ width: "100%" }}>
               <CardContent>
-                <Typography key={month} variant="h6" fontWeight={600} style={{ textAlign: 'left' }} gutterBottom>{month}</Typography>
-                {/* <GameList games={gamesByMonth[month]?.gamesFinished} /> */}
-                <Grid size={12} container spacing={2} justifyContent="start">
-                  {gamesByMonth[month]?.gamesFinished.map(game => <Game key={game.id} game={game} />)}
-                </Grid>
+                <Stack direction={"row"}>
+                  <Typography flex={1} variant="h6" gutterBottom>Completion by month</Typography>
+                  <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+                </Stack>
+                <ChartContainer
+                  // <BarChart
+                  sx={{ minHeight: '300px' }}
+                  height={240}
+                  dataset={Object.keys(gamesByMonth)
+                    .map(monthName => {
+                      return {
+                        month: monthName,
+                        totalBeat: gamesByMonth[monthName].totalBeat,
+                        totalComplete: gamesByMonth[monthName].totalComplete,
+                        totalPlaytime: getPlayTimeInHours(gamesByMonth[monthName].totalPlaytime)
+                      }
+                    }) as any}
+                  xAxis={[{ dataKey: 'month', scaleType: 'band', id: 'monthAxis' }]}
+                  yAxis={[
+                    { id: 'beatCompleteAxis', scaleType: 'linear', position: 'left', label: 'Games Finished' },
+                    { id: 'playtimeAxis', scaleType: 'linear', position: 'right', label: 'Playtime (hrs)' }
+                  ]}
+                  // yAxis={[{ label: "Games Finished" }]}
+                  series={[
+                    { type: 'bar', dataKey: 'totalBeat', stack: 'month', color: green[500], label: 'Beat', yAxisId: 'beatCompleteAxis' },
+                    { type: 'bar', dataKey: 'totalComplete', stack: 'month', color: blue[500], label: 'Complete', yAxisId: 'beatCompleteAxis' },
+                    { type: 'line', dataKey: 'totalPlaytime', stack: 'other', color: yellow[500], label: 'Playtime (hrs)', yAxisId: 'playtimeAxis' },
+                  ]}
+                >
+                  <BarPlot />
+                  <LinePlot />
+                  <ChartsXAxis axisId="monthAxis" />
+                  <ChartsYAxis axisId="beatCompleteAxis" />
+                  <ChartsYAxis axisId="playtimeAxis" />
+                  <ChartsTooltip />
+                </ChartContainer>
               </CardContent>
             </Card>
-          ))}
-        </Grid>
+          </Grid>
+        )}
+        {viewSettings.sectionVisibility.showMonthlyGames && (
+          <Grid size={12}>
+            {gamesByMonth && Object.keys(gamesByMonth).map(month => (
+              <Card variant="outlined" sx={{ marginBottom: '6px' }} key={month} >
+                <CardContent>
+                  <Typography key={month} variant="h6" fontWeight={600} style={{ textAlign: 'left' }} gutterBottom>{month}</Typography>
+                  {/* <GameList games={gamesByMonth[month]?.gamesFinished} /> */}
+                  <Grid size={12} container spacing={2} justifyContent="start">
+                    {gamesByMonth[month]?.gamesFinished.map(game => <Game key={game.id} game={game} />)}
+                  </Grid>
+                </CardContent>
+              </Card>
+            ))}
+          </Grid>
+        )}
       </Grid>
     </Box >
   );

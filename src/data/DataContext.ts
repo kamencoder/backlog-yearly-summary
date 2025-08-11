@@ -9,9 +9,22 @@ export interface Data {
   userData: UserData,
 }
 
+export interface ViewSectionVisibilitySettings {
+  showPlatformSection: boolean;
+  showGameLengthSection: boolean;
+  showDecadeSection: boolean;
+  showMonthlyOverview: boolean;
+  showMonthlyGames: boolean;
+}
+
+export interface ViewSettings {
+  sectionVisibility: ViewSectionVisibilitySettings;
+  showPlaytimeStats: boolean;
+  showAcquisitionStats: boolean;
+}
 export interface UserData {
   gameEdits: Record<string, GameEdit | undefined>; // Game edits by game id
-  year: number;
+  viewSettings: ViewSettings;
 }
 export interface GameEdit {
   coverImage: string | null;
@@ -22,15 +35,30 @@ export interface DataContextProps {
   initialize: (games: CsvData[]) => void;
   editYear: (year: number) => void;
   editGame: (gameId: string, gameEdit: GameEdit) => void;
+  editViewSettings: (settings: Partial<ViewSettings>) => void;
 }
 
 export interface CsvData {
   [key: string]: string | number | null | undefined;
 }
 
-const defaultContext: DataContextProps = {
+export const defaultContext: DataContextProps = {
   data: {
     year: new Date().getFullYear(),
+    userData: {
+      gameEdits: {},
+      viewSettings: {
+        sectionVisibility: {
+          showPlatformSection: true,
+          showGameLengthSection: true,
+          showDecadeSection: true,
+          showMonthlyOverview: true,
+          showMonthlyGames: true,
+        },
+        showPlaytimeStats: true,
+        showAcquisitionStats: true,
+      },
+    }
   }
 } as DataContextProps;
 

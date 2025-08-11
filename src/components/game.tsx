@@ -16,6 +16,8 @@ export const Game = (props: GameProps) => {
   const menuOpen = Boolean(menuElement);
   const [coverImage, setCoverImage] = useState(game.coverImage);
   const { editGame } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { viewSettings } = data.userData;
 
 
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -104,11 +106,11 @@ export const Game = (props: GameProps) => {
               <Typography variant="body2">
                 {game.platformAbbreviation}{game.releaseYear ? ` - ${game.releaseYear}` : ''}
               </Typography>
-              {
+              {viewSettings.showPlaytimeStats && (
                 <Typography variant="body2">
                   {!game.playTime ? '⠀' : getPlayTimeInHours(game.playTime, 1) + ((game.playTime || 0) > 1 ? ' hrs' : ' hr')}
                 </Typography>
-              }
+              )}
               <Rating size={"small"} name="game-rating" value={game.rating} precision={0.5} readOnly />
             </Stack>
             <Stack height={"100%"} alignSelf={"end"} gap={"2px"}>

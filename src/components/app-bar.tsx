@@ -6,8 +6,9 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, Typography } from '@mui/material';
 import { DataContext } from '../data/DataContext';
-import { Print, Image, BugReport } from '@mui/icons-material';
+import { Print, Image, BugReport, Settings } from '@mui/icons-material';
 import html2canvas from 'html2canvas';
+import SettingsModal from './settings-modal';
 // import { parseFile, FileInput } from './data-importer';
 
 export default function AppBar() {
@@ -15,6 +16,7 @@ export default function AppBar() {
   const currentYear = (new Date()).getFullYear();
   const selectableYears = Array.from({ length: 10 }, (_x, i) => currentYear - i);
   const dataContext = React.useContext(DataContext);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const onYearSelectChanged = (e: any) => {
@@ -83,9 +85,21 @@ export default function AppBar() {
             >
               {selectableYears.map(year => (<MenuItem value={year}>{year}</MenuItem>))}
             </Select>
+            <IconButton
+              size="large"
+              color="inherit"
+              aria-label="settings"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <Settings />
+            </IconButton>
           </Toolbar>
         </MuiAppBar>
       </Box>
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
           <List>
