@@ -21,34 +21,12 @@ export const YearSummary = () => {
   return (
     <Box sx={styles.yearSummaryContainer} id='year-summary-container'>
       <Grid container spacing={3}>
-        <Grid size={12}>
-          <YearOverviewSection />
-        </Grid>
-        {viewSettings.sectionVisibility.showPlatformSection && (
-          <Grid size={12} container>
-            <PlatformSection />
-          </Grid>
-        )}
-        {viewSettings.sectionVisibility.showGameLengthSection && viewSettings.showPlaytimeStats && (
-          <Grid size={12}>
-            <GameLengthSection />
-          </Grid>
-        )}
-        {viewSettings.sectionVisibility.showDecadeSection && (
-          <Grid size={12}>
-            <DecadeSection />
-          </Grid>
-        )}
-        {viewSettings.sectionVisibility.showAcquisitions && (
-          <Grid size={12}>
-            <AcquisitionsSection />
-          </Grid>
-        )}
-        {viewSettings.sectionVisibility.showMonthlyOverview && (
-          <Grid size={12} container>
-            <MonthlySection />
-          </Grid>
-        )}
+        <YearOverviewSection />
+        <PlatformSection />
+        <GameLengthSection />
+        <DecadeSection />
+        <AcquisitionsSection />
+        <MonthlySection />
       </Grid>
     </Box>
   );

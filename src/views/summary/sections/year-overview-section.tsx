@@ -1,4 +1,4 @@
-import { Typography, Card, CardContent, Stack, Alert } from '@mui/material';
+import { Typography, Card, CardContent, Stack, Alert, Grid } from '@mui/material';
 import { SingleStat } from '../../../components/single-stat';
 import { Warning } from '@mui/icons-material';
 import { blue, yellow, red } from '@mui/material/colors';
@@ -19,7 +19,7 @@ export const YearOverviewSection = () => {
   const totalTimeSpent = getPlayTimeInHours(summary.totalTimeSpent) || 0;
 
   return (
-    <>
+    <Grid size={12}>
       <Typography variant="h1" fontWeight={700} textAlign="center">
         {summary.year}
       </Typography>
@@ -40,7 +40,7 @@ export const YearOverviewSection = () => {
           </Stack>
         </CardContent>
       </Card>
-    </>
+    </Grid>
   );
 }
 
