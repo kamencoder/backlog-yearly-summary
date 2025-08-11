@@ -1,10 +1,10 @@
-import { Card, CardContent, Stack, Typography, Grid, Accordion, AccordionSummary, AccordionDetails, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Alert } from '@mui/material';
+import { Card, CardContent, Stack, Typography, Grid, Accordion, AccordionSummary, AccordionDetails, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Alert, IconButton, Menu, MenuItem } from '@mui/material';
 import InfoIcon from '../../../components/info-icon';
 import { SingleStat } from '../../../components/single-stat';
 import { AcquisitionGuage } from '../../../components/acquisition-guage';
-import { Warning, ExpandMore } from '@mui/icons-material';
+import { Warning, ExpandMore, Settings } from '@mui/icons-material';
 import { red, yellow, green } from '@mui/material/colors';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
 
 export const AcquisitionsSection = () => {
@@ -14,6 +14,15 @@ export const AcquisitionsSection = () => {
   if (!summary) {
     return null; // or some loading state
   }
+  const { editViewSettings } = dataContext;
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const menuOpen = Boolean(menuAnchor);
+  const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
+  const handleMenuClose = () => setMenuAnchor(null);
+  const handleHide = () => {
+    editViewSettings({ sectionVisibility: { showAcquisitions: false } });
+    handleMenuClose();
+  };
 
   return (
     <Card variant="outlined">
@@ -21,6 +30,12 @@ export const AcquisitionsSection = () => {
         <Stack direction={"row"}>
           <Typography flex={1} variant="h6" gutterBottom>Backlog Additions</Typography>
           <InfoIcon text="Includes games acquired within this year based on the Acquisition Date set on the game in IB. The number of games played includes total number of games among those acquired this year which are marked as playing or played. The number of games finished includes total number of those acquired this year which are marked beaten or completed." />
+          <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
+            <Settings />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleMenuClose}>
+            <MenuItem onClick={handleHide}>Hide</MenuItem>
+          </Menu>
         </Stack>
         {!summary.acquisitions.totalAcquired && (
           <Alert variant="outlined" icon={<Warning fontSize="inherit" />} severity="warning" sx={{ marginBottom: '16px' }}>

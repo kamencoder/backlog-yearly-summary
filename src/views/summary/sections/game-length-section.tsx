@@ -1,9 +1,10 @@
-import { Card, CardContent, Stack, Typography } from '@mui/material';
+import { Card, CardContent, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import InfoIcon from '../../../components/info-icon';
 import { LineChart } from '@mui/x-charts';
 import { blue, yellow } from '@mui/material/colors';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
+import { Settings } from '@mui/icons-material';
 
 export const GameLengthSection = () => {
   const dataContext = useContext(DataContext);
@@ -12,6 +13,15 @@ export const GameLengthSection = () => {
   if (!summary) {
     return null; // or some loading state
   }
+  const { editViewSettings } = dataContext;
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const menuOpen = Boolean(menuAnchor);
+  const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
+  const handleMenuClose = () => setMenuAnchor(null);
+  const handleHide = () => {
+    editViewSettings({ sectionVisibility: { showGameLengthSection: false } });
+    handleMenuClose();
+  };
 
   return (
     <Card variant="outlined">
@@ -19,6 +29,12 @@ export const GameLengthSection = () => {
         <Stack direction={"row"}>
           <Typography flex={1} variant="h6" gutterBottom>Game Lengths</Typography>
           <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB. Game length is determined by your Playtime entered for each game." />
+          <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
+            <Settings />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleMenuClose}>
+            <MenuItem onClick={handleHide}>Hide</MenuItem>
+          </Menu>
         </Stack>
         <LineChart
           title="Game Lengths"

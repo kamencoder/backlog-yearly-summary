@@ -1,9 +1,10 @@
-import { Card, CardContent, Stack, Typography, FormControlLabel, Switch, Box, Grid } from '@mui/material';
+import { Card, CardContent, Stack, Typography, FormControlLabel, Switch, Box, Grid, IconButton, Menu, MenuItem } from '@mui/material';
 import InfoIcon from '../../../components/info-icon';
 import { BarChart } from '@mui/x-charts';
 import { blue, yellow } from '@mui/material/colors';
 import { useContext, useMemo, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
+import { Settings } from '@mui/icons-material';
 
 export const PlatformSection = () => {
 
@@ -18,6 +19,15 @@ export const PlatformSection = () => {
 
   const sortedPlatformsByTotalGames = useMemo(() => summary.platformTotals.sort((a, b) => b.totalGames - a.totalGames), [summary.platformTotals]);
   const sortedPlatformsByTotalTime = useMemo(() => [...summary.platformTotals].sort((a, b) => b.totalTime - a.totalTime), [summary.platformTotals]);
+  const { editViewSettings } = useContext(DataContext);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const menuOpen = Boolean(menuAnchor);
+  const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
+  const handleMenuClose = () => setMenuAnchor(null);
+  const handleHide = () => {
+    editViewSettings({ sectionVisibility: { showPlatformSection: false } });
+    handleMenuClose();
+  };
 
   return (
     <Card variant="outlined" sx={{ width: "100%" }}>
@@ -35,6 +45,12 @@ export const PlatformSection = () => {
             />
           }
           <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+          <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
+            <Settings />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleMenuClose}>
+            <MenuItem onClick={handleHide}>Hide</MenuItem>
+          </Menu>
         </Stack>
         <Grid container spacing={2}>
           {(!showPlatformTimeAndGamesCombined || !viewSettings.showPlaytimeStats) && (

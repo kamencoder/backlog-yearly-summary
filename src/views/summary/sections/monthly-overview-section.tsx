@@ -1,12 +1,13 @@
-import { Card, CardContent, Grid, Stack, Typography } from '@mui/material';
+import { Card, CardContent, Grid, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import InfoIcon from '../../../components/info-icon';
 import { ChartContainer, BarPlot, LinePlot, ChartsXAxis, ChartsYAxis, ChartsTooltip } from '@mui/x-charts';
 import { green, blue, yellow } from '@mui/material/colors';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
 import { DateTime } from 'luxon';
 import type { SummaryGameInfo } from '../../../data/summarizer';
 import { Game } from '../../../components/game';
+import { Settings } from '@mui/icons-material';
 
 export const MonthlySection = () => {
 
@@ -17,6 +18,15 @@ export const MonthlySection = () => {
   if (!summary) {
     return null; // or some loading state
   }
+  const { editViewSettings } = dataContext;
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const menuOpen = Boolean(menuAnchor);
+  const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
+  const handleMenuClose = () => setMenuAnchor(null);
+  const handleHide = () => {
+    editViewSettings({ sectionVisibility: { showMonthlyOverview: false, showMonthlyGames: false } });
+    handleMenuClose();
+  };
 
   interface MonthSummary { gamesFinished: SummaryGameInfo[]; totalBeat: number; totalComplete: number; totalPlaytime: number; }
   const gamesByMonth = useMemo(() => {
@@ -48,6 +58,12 @@ export const MonthlySection = () => {
           <Stack direction={"row"}>
             <Typography flex={1} variant="h6" gutterBottom>Completion by month</Typography>
             <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+            <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
+              <Settings />
+            </IconButton>
+            <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleMenuClose}>
+              <MenuItem onClick={handleHide}>Hide</MenuItem>
+            </Menu>
           </Stack>
           <ChartContainer
             sx={{ minHeight: '300px' }}

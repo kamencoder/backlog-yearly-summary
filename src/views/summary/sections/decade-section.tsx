@@ -1,4 +1,6 @@
-import { Card, CardContent, Stack, Typography, Grid, Box } from '@mui/material';
+import { Card, CardContent, Stack, Typography, Grid, Box, IconButton, Menu, MenuItem } from '@mui/material';
+import { Settings } from '@mui/icons-material';
+import { useState } from 'react';
 import InfoIcon from '../../../components/info-icon';
 import { PieChart } from '@mui/x-charts';
 import { getPlayTimeInHours } from '../../../data/summarizer';
@@ -23,6 +25,15 @@ export const DecadeSection = () => {
   const dataContext = useContext(DataContext);
   const { summary, userData } = dataContext.data;
   const { viewSettings } = userData;
+  const { editViewSettings } = dataContext;
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const menuOpen = Boolean(menuAnchor);
+  const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
+  const handleMenuClose = () => setMenuAnchor(null);
+  const handleHide = () => {
+    editViewSettings({ sectionVisibility: { showDecadeSection: false } });
+    handleMenuClose();
+  };
 
   if (!summary) {
     return null; // or some loading state
@@ -34,6 +45,12 @@ export const DecadeSection = () => {
         <Stack direction={"row"}>
           <Typography flex={1} variant="h6" gutterBottom>Decades</Typography>
           <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
+          <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
+            <Settings />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleMenuClose}>
+            <MenuItem onClick={handleHide}>Hide</MenuItem>
+          </Menu>
         </Stack>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>

@@ -17,6 +17,7 @@ const sectionLabels: Record<string, string> = {
   showPlatformSection: 'Platform Section',
   showGameLengthSection: 'Game Length Section',
   showDecadeSection: 'Decade Section',
+  showAcquisitions: 'Backlog Section',
   showMonthlyOverview: 'Monthly Overview',
   showMonthlyGames: 'Monthly Games',
 };
@@ -27,7 +28,6 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
 
   const [sectionVisibility, setSectionVisibility] = React.useState(viewSettings?.sectionVisibility);
   const [showPlaytimeStats, setShowPlaytimeStats] = React.useState(viewSettings?.showPlaytimeStats);
-  const [showAcquisitionStats, setShowAcquisitionStats] = React.useState(viewSettings?.showAcquisitionStats);
 
   const handleSectionChange = (key: keyof typeof sectionVisibility) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setSectionVisibility({ ...sectionVisibility, [key]: event.target.checked });
@@ -37,7 +37,6 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
     dataContext.editViewSettings({
       sectionVisibility,
       showPlaytimeStats,
-      showAcquisitionStats,
     })
     onClose();
   };
@@ -57,16 +56,6 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
               />
             }
             label="Playtime Stats"
-          />
-          <FormControlLabel
-            sx={{ ml: 1 }}
-            control={
-              <Checkbox
-                checked={showAcquisitionStats}
-                onChange={e => setShowAcquisitionStats(e.target.checked)}
-              />
-            }
-            label="Acquisition Stats"
           />
         </FormGroup>
         <FormGroup>

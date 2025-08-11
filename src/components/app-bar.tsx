@@ -96,10 +96,10 @@ export default function AppBar() {
           </Toolbar>
         </MuiAppBar>
       </Box>
-      <SettingsModal
+      {settingsOpen && <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-      />
+      />}
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
           <List>

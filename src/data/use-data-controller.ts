@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getYearSummary, type Summary } from "./summarizer";
-import { defaultContext, type CsvData, type Data, type UserData, type ViewSettings } from "./data-context";
+import { defaultContext, type CsvData, type Data, type DeepPartial, type UserData, type ViewSettings } from "./data-context";
 
 const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 
@@ -86,7 +86,7 @@ export const useDataController = () => {
       }
       setUserData(newUserData);
     },
-    editViewSettings: (settings: Partial<ViewSettings>) => {
+    editViewSettings: (settings: DeepPartial<ViewSettings>) => {
       const newUserData = {
         ...userData,
         viewSettings: {

@@ -15,12 +15,12 @@ export interface ViewSectionVisibilitySettings {
   showDecadeSection: boolean;
   showMonthlyOverview: boolean;
   showMonthlyGames: boolean;
+  showAcquisitions: boolean;
 }
 
 export interface ViewSettings {
   sectionVisibility: ViewSectionVisibilitySettings;
   showPlaytimeStats: boolean;
-  showAcquisitionStats: boolean;
 }
 export interface UserData {
   gameEdits: Record<string, GameEdit | undefined>; // Game edits by game id
@@ -29,13 +29,17 @@ export interface UserData {
 export interface GameEdit {
   coverImage: string | null;
 }
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
 
 export interface DataContextProps {
   data: Data;
   initialize: (games: CsvData[]) => void;
   editYear: (year: number) => void;
   editGame: (gameId: string, gameEdit: GameEdit) => void;
-  editViewSettings: (settings: Partial<ViewSettings>) => void;
+  editViewSettings: (settings: DeepPartial<ViewSettings>) => void;
 }
 
 export interface CsvData {
@@ -52,11 +56,11 @@ export const defaultContext: DataContextProps = {
           showPlatformSection: true,
           showGameLengthSection: true,
           showDecadeSection: true,
+          showAcquisitions: true,
           showMonthlyOverview: true,
           showMonthlyGames: true,
         },
         showPlaytimeStats: true,
-        showAcquisitionStats: true,
       },
     }
   }

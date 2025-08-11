@@ -39,7 +39,7 @@ export const YearSummary = () => {
             <DecadeSection />
           </Grid>
         )}
-        {viewSettings.showAcquisitionStats && (
+        {viewSettings.sectionVisibility.showAcquisitions && (
           <Grid size={12}>
             <AcquisitionsSection />
           </Grid>
