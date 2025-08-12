@@ -17,14 +17,14 @@ export const GameLengthSection = () => {
   const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
   const handleHide = () => {
-    editViewSettings({ sectionVisibility: { showGameLengthSection: false } });
+    editViewSettings({ sectionSettings: { gameLength: { visible: false } } });
     handleMenuClose();
   };
 
   if (!summary) {
     return null; // or some loading state
   }
-  if (!viewSettings.sectionVisibility.showGameLengthSection) {
+  if (!viewSettings.sectionSettings.gameLength.visible) {
     return null;
   }
 

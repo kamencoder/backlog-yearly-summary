@@ -1,85 +1,138 @@
 import React, { useContext } from 'react';
-import { Modal, Box, Typography, FormGroup, FormControlLabel, Checkbox, Button } from '@mui/material';
+import { Box, Typography, FormGroup, FormControlLabel, Checkbox, Button, Dialog, DialogContent, DialogActions, Divider } from '@mui/material';
 import { DataContext } from '../data/data-context';
-
-const modalStyle = {
-  position: 'absolute' as const,
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  minWidth: 300,
-};
-
-const sectionLabels: Record<string, string> = {
-  showPlatformSection: 'Platform Section',
-  showGameLengthSection: 'Game Length Section',
-  showDecadeSection: 'Decade Section',
-  showAcquisitions: 'Backlog Section',
-  showMonthlyOverview: 'Monthly Overview',
-  showMonthlyGames: 'Monthly Games',
-};
 
 const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const dataContext = useContext(DataContext);
   const viewSettings = dataContext.data.userData.viewSettings;
 
-  const [sectionVisibility, setSectionVisibility] = React.useState(viewSettings?.sectionVisibility);
+  const [sectionSettings, setSectionSettings] = React.useState(viewSettings?.sectionSettings);
   const [showPlaytimeStats, setShowPlaytimeStats] = React.useState(viewSettings?.showPlaytimeStats);
 
-  const handleSectionChange = (key: keyof typeof sectionVisibility) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSectionVisibility({ ...sectionVisibility, [key]: event.target.checked });
+  const handleSectionVisibilityChange = (key: keyof typeof sectionSettings) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSectionSettings({ ...sectionSettings, [key]: { ...sectionSettings[key], visible: event.target.checked } });
   };
+  const setPlatformCombineTotalsAndTime = (value: boolean) => {
+    setSectionSettings({ ...sectionSettings, platform: { ...sectionSettings.platform, showPlatformTimeAndGamesCombined: value } });
+  }
 
   const handleSave = () => {
     dataContext.editViewSettings({
-      sectionVisibility,
+      sectionSettings,
       showPlaytimeStats,
     })
     onClose();
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={modalStyle}>
+    <Dialog open={open} onClose={onClose} scroll="body">
+      <DialogContent >
         <Typography variant="h5" gutterBottom>Settings</Typography>
         <FormGroup>
-          <Typography fontWeight={700} gutterBottom sx={{ mt: 2 }}>Stats</Typography>
+          <Typography fontWeight={700} marginBottom={0.5} sx={{ mt: 2 }}>General</Typography>
           <FormControlLabel
             sx={{ ml: 1 }}
             control={
               <Checkbox
                 checked={showPlaytimeStats}
-                onChange={e => setShowPlaytimeStats(e.target.checked)}
+                onChange={e => {
+                  setShowPlaytimeStats(e.target.checked)
+                  if (!e.target.checked) {
+                    setSectionSettings({
+                      ...sectionSettings,
+                      platform: { ...sectionSettings.platform, showPlatformTimeAndGamesCombined: false },
+                      gameLength: { ...sectionSettings.gameLength, visible: false }
+                    });
+                  }
+
+                }}
               />
             }
-            label="Playtime Stats"
+            label="Use Playtime Stats"
           />
         </FormGroup>
+        <Divider />
         <FormGroup>
-          <Typography fontWeight={700} gutterBottom>Sections</Typography>
-          {Object.entries(sectionLabels).map(([key, label]) => (
-            <FormControlLabel
-              sx={{ ml: 1 }}
-              key={key}
-              control={
-                <Checkbox
-                  checked={sectionVisibility[key as keyof typeof sectionVisibility]}
-                  onChange={handleSectionChange(key as keyof typeof sectionVisibility)}
-                />
-              }
-              label={label}
-            />
-          ))}
+          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Platform Section</Typography>
+          <FormControlLabel
+            sx={{ ml: 1 }}
+            control={
+              <Checkbox
+                checked={sectionSettings.platform.visible}
+                onChange={handleSectionVisibilityChange('platform' as keyof typeof sectionSettings)}
+              />
+            }
+            label="Visible"
+          />
+          <FormControlLabel
+            sx={{ ml: 1 }}
+            control={
+              <Checkbox
+                disabled={!showPlaytimeStats}
+                checked={sectionSettings.platform.showPlatformTimeAndGamesCombined}
+                onChange={e => setPlatformCombineTotalsAndTime(e.target.checked)}
+              />
+            }
+            label="Combine Totals and Time"
+          />
+          <Divider />
+          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Game Length Section</Typography>
+          <FormControlLabel
+            sx={{ ml: 1 }}
+            control={
+              <Checkbox
+                disabled={!showPlaytimeStats}
+                checked={sectionSettings.gameLength.visible}
+                onChange={handleSectionVisibilityChange('gameLength' as keyof typeof sectionSettings)}
+              />
+            }
+            label="Visible"
+          />
+          <Divider />
+          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Decade Section</Typography>
+          <FormControlLabel
+            sx={{ ml: 1 }}
+            control={
+              <Checkbox
+                checked={sectionSettings.decade.visible}
+                onChange={handleSectionVisibilityChange('decade' as keyof typeof sectionSettings)}
+              />
+            }
+            label="Visible"
+          />
+          <Divider />
+          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Backlog Additions</Typography>
+          <FormControlLabel
+            sx={{ ml: 1 }}
+            control={
+              <Checkbox
+                checked={sectionSettings.acquisitions.visible}
+                onChange={handleSectionVisibilityChange('acquisitions' as keyof typeof sectionSettings)}
+              />
+            }
+            label="Visible"
+          />
+          <Divider />
+          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Monthly Overview</Typography>
+          <FormControlLabel
+            sx={{ ml: 1 }}
+            control={
+              <Checkbox
+                checked={sectionSettings.monthly.visible}
+                onChange={handleSectionVisibilityChange('monthly' as keyof typeof sectionSettings)}
+              />
+            }
+            label="Visible"
+          />
         </FormGroup>
+      </DialogContent>
+      <DialogActions>
         <Box mt={2} display="flex" justifyContent="flex-end">
           <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
           <Button variant="contained" onClick={handleSave}>Save</Button>
         </Box>
-      </Box>
-    </Modal>
+      </DialogActions>
+    </Dialog>
   );
 };
 

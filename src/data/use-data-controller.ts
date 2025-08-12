@@ -8,7 +8,39 @@ export const useDataController = () => {
 
   const currentYear = (new Date()).getFullYear();
   const [csvData, setCsvData] = useState<{ games: CsvData[] }>();
-  const [userData, setUserData] = useState<UserData>({ ...defaultContext.data.userData, ...initialUserData, gameEdits: { ...initialUserData.gameEdits } });
+  const [userData, setUserData] = useState<UserData>({
+    ...defaultContext.data.userData,
+    ...initialUserData,
+    gameEdits: {
+      ...initialUserData.gameEdits
+    },
+    viewSettings: {
+      ...defaultContext.data.userData.viewSettings,
+      ...initialUserData.viewSettings,
+      sectionSettings: {
+        platform: {
+          ...defaultContext.data.userData.viewSettings.sectionSettings.platform,
+          ...initialUserData.sectionSettings?.platform,
+        },
+        gameLength: {
+          ...defaultContext.data.userData.viewSettings.sectionSettings.gameLength,
+          ...initialUserData.sectionSettings?.gameLength,
+        },
+        decade: {
+          ...defaultContext.data.userData.viewSettings.sectionSettings.decade,
+          ...initialUserData.sectionSettings?.decade,
+        },
+        acquisitions: {
+          ...defaultContext.data.userData.viewSettings.sectionSettings.acquisitions,
+          ...initialUserData.sectionSettings?.acquisitions,
+        },
+        monthly: {
+          ...defaultContext.data.userData.viewSettings.sectionSettings.monthly,
+          ...initialUserData.sectionSettings?.monthly,
+        },
+      }
+    }
+  });
   const [baseSummary, setBaseSummary] = useState<Summary | null>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
@@ -92,9 +124,27 @@ export const useDataController = () => {
         viewSettings: {
           ...userData.viewSettings,
           ...settings,
-          sectionVisibility: {
-            ...userData.viewSettings.sectionVisibility,
-            ...settings.sectionVisibility,
+          sectionSettings: {
+            platform: {
+              ...userData.viewSettings.sectionSettings.platform,
+              ...settings.sectionSettings?.platform,
+            },
+            gameLength: {
+              ...userData.viewSettings.sectionSettings.gameLength,
+              ...settings.sectionSettings?.gameLength,
+            },
+            decade: {
+              ...userData.viewSettings.sectionSettings.decade,
+              ...settings.sectionSettings?.decade,
+            },
+            acquisitions: {
+              ...userData.viewSettings.sectionSettings.acquisitions,
+              ...settings.sectionSettings?.acquisitions,
+            },
+            monthly: {
+              ...userData.viewSettings.sectionSettings.monthly,
+              ...settings.sectionSettings?.monthly,
+            },
           }
         }
       }

@@ -11,7 +11,7 @@ export const PlatformSection = () => {
   const dataContext = useContext(DataContext);
   const { summary, userData } = dataContext.data;
   const { viewSettings } = userData;
-  const [showPlatformTimeAndGamesCombined, setShowPlatformTimeAndGamesCombined] = useState(true);
+  const platformViewSettings = viewSettings.sectionSettings.platform;
 
   const sortedPlatformsByTotalGames = useMemo(() => {
     if (!summary?.platformTotals) return null;
@@ -28,7 +28,7 @@ export const PlatformSection = () => {
   const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
   const handleHide = () => {
-    editViewSettings({ sectionVisibility: { showPlatformSection: false } });
+    editViewSettings({ sectionSettings: { platform: { visible: false } } });
     handleMenuClose();
   };
 
@@ -37,7 +37,7 @@ export const PlatformSection = () => {
     return null; // or some loading state
   }
 
-  if (!viewSettings.sectionVisibility.showPlatformSection) {
+  if (!platformViewSettings.visible) {
     return null;
   }
   return (
@@ -57,8 +57,14 @@ export const PlatformSection = () => {
                   <FormControlLabel control={
                     <Switch
                       size="small"
-                      checked={showPlatformTimeAndGamesCombined}
-                      onChange={e => setShowPlatformTimeAndGamesCombined(e.currentTarget.checked)}
+                      checked={platformViewSettings.showPlatformTimeAndGamesCombined}
+                      onChange={e => editViewSettings({
+                        sectionSettings: {
+                          platform: {
+                            showPlatformTimeAndGamesCombined: e.currentTarget.checked
+                          }
+                        }
+                      })}
                     />}
                     label="combined"
                   />
@@ -67,7 +73,7 @@ export const PlatformSection = () => {
             </Menu>
           </Stack>
           <Grid container spacing={2}>
-            {(!showPlatformTimeAndGamesCombined || !viewSettings.showPlaytimeStats) && sortedPlatformsByTotalGames?.length && (
+            {(!platformViewSettings.showPlatformTimeAndGamesCombined || !viewSettings.showPlaytimeStats) && sortedPlatformsByTotalGames?.length && (
               <>
                 <Grid size={{ md: 12, lg: 6 }}>
                   <Box>
@@ -104,7 +110,7 @@ export const PlatformSection = () => {
                 )}
               </>
             )}
-            {showPlatformTimeAndGamesCombined && viewSettings.showPlaytimeStats && sortedPlatformsByTotalTime?.length && (
+            {platformViewSettings.showPlatformTimeAndGamesCombined && viewSettings.showPlaytimeStats && sortedPlatformsByTotalTime?.length && (
               <BarChart
                 dataset={sortedPlatformsByTotalTime as any}
                 yAxis={[{

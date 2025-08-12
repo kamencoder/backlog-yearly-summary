@@ -9,17 +9,24 @@ export interface Data {
   userData: UserData,
 }
 
-export interface ViewSectionVisibilitySettings {
-  showPlatformSection: boolean;
-  showGameLengthSection: boolean;
-  showDecadeSection: boolean;
-  showMonthlyOverview: boolean;
-  showMonthlyGames: boolean;
-  showAcquisitions: boolean;
+
+export interface ViewSectionSettings {
+  platform: PlatformViewSectionSettings;
+  gameLength: BaseViewSectionSettings;
+  decade: BaseViewSectionSettings;
+  acquisitions: BaseViewSectionSettings;
+  monthly: BaseViewSectionSettings;
+}
+
+export interface BaseViewSectionSettings {
+  visible: boolean;
+}
+export interface PlatformViewSectionSettings extends BaseViewSectionSettings {
+  showPlatformTimeAndGamesCombined: boolean;
 }
 
 export interface ViewSettings {
-  sectionVisibility: ViewSectionVisibilitySettings;
+  sectionSettings: ViewSectionSettings;
   showPlaytimeStats: boolean;
 }
 export interface UserData {
@@ -52,13 +59,12 @@ export const defaultContext: DataContextProps = {
     userData: {
       gameEdits: {},
       viewSettings: {
-        sectionVisibility: {
-          showPlatformSection: true,
-          showGameLengthSection: true,
-          showDecadeSection: true,
-          showAcquisitions: true,
-          showMonthlyOverview: true,
-          showMonthlyGames: true,
+        sectionSettings: {
+          platform: { visible: true, showPlatformTimeAndGamesCombined: true },
+          gameLength: { visible: true },
+          decade: { visible: true },
+          acquisitions: { visible: true },
+          monthly: { visible: true },
         },
         showPlaytimeStats: true,
       },

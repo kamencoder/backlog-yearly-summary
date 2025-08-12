@@ -17,14 +17,14 @@ export const AcquisitionsSection = () => {
   const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
   const handleHide = () => {
-    editViewSettings({ sectionVisibility: { showAcquisitions: false } });
+    editViewSettings({ sectionSettings: { acquisitions: { visible: false } } });
     handleMenuClose();
   };
 
   if (!summary) {
     return null; // or some loading state
   }
-  if (!userData.viewSettings.sectionVisibility.showAcquisitions) {
+  if (!userData.viewSettings.sectionSettings.acquisitions.visible) {
     return null;
   }
 

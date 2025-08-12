@@ -31,14 +31,14 @@ export const DecadeSection = () => {
   const handleMenuClick = (event: any) => setMenuAnchor(event.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
   const handleHide = () => {
-    editViewSettings({ sectionVisibility: { showDecadeSection: false } });
+    editViewSettings({ sectionSettings: { decade: { visible: false } } });
     handleMenuClose();
   };
 
   if (!summary) {
     return null; // or some loading state
   }
-  if (!viewSettings.sectionVisibility.showDecadeSection) {
+  if (!viewSettings.sectionSettings.decade.visible) {
     return null;
   }
 

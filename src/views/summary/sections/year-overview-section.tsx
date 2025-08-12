@@ -35,7 +35,7 @@ export const YearOverviewSection = () => {
           <Stack spacing={3} direction="row" sx={{ justifyContent: "center", alignItems: "center" }}>
             <SingleStat value={summary.totalGamesBeaten + summary.totalGamesCompeleted} label="Games Finished" color={blue[500]} />
             {viewSettings.showPlaytimeStats && <SingleStat value={totalTimeSpent} label="Hours Played" color={yellow[700]} />}
-            {viewSettings.sectionVisibility.showAcquisitions && <SingleStat value={summary.acquisitions.totalAcquired} label="Games Acquired" color={red[500]} />}
+            {viewSettings.sectionSettings?.acquisitions.visible && <SingleStat value={summary.acquisitions.totalAcquired} label="Games Acquired" color={red[500]} />}
           </Stack>
         </CardContent>
       </Card>
