@@ -128,12 +128,18 @@ export const PlatformSection = () => {
                   {
                     dataKey: 'percentOfTotalGames', xAxisId: 'totalGamesAxis',
                     label: "% of Total Finished", color: blue[500],
-                    valueFormatter: (x) => `${x}%`,
+                    valueFormatter: (x, context) => {
+                      const totalGames = sortedPlatformsByTotalTime[context.dataIndex].totalGames;
+                      return `${x}% (${totalGames} game${totalGames !== 1 ? 's' : ''})`;
+                    },
                   },
                   {
                     dataKey: 'percentOfTotalTime', xAxisId: 'totalTimeAxis',
                     label: "% of Total Time", color: yellow[700],
-                    valueFormatter: (x) => `${x}%`,
+                    valueFormatter: (x, context) => {
+                      const totalTime = sortedPlatformsByTotalTime[context.dataIndex].totalTime;
+                      return `${x}% (${totalTime} hr${totalTime !== 1 ? 's' : ''})`;
+                    },
                   },
                 ]}
                 layout="horizontal"
