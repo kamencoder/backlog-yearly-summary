@@ -11,13 +11,6 @@ export const GameLengthSection = () => {
   const { summary, userData } = dataContext.data;
   const { viewSettings } = userData;
 
-  if (!summary) {
-    return null; // or some loading state
-  }
-  if (viewSettings.sectionVisibility.showGameLengthSection) {
-    return null;
-  }
-
   const { editViewSettings } = dataContext;
   const [menuAnchor, setMenuAnchor] = useState(null);
   const menuOpen = Boolean(menuAnchor);
@@ -27,6 +20,13 @@ export const GameLengthSection = () => {
     editViewSettings({ sectionVisibility: { showGameLengthSection: false } });
     handleMenuClose();
   };
+
+  if (!summary) {
+    return null; // or some loading state
+  }
+  if (!viewSettings.sectionVisibility.showGameLengthSection) {
+    return null;
+  }
 
   return (
     <Grid size={12}>

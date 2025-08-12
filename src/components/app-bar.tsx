@@ -56,7 +56,7 @@ export default function AppBar() {
         a.click()
         canvas.remove()
       }).catch(err => {
-        console.log(err);
+        console.error(err);
       });
   }
 

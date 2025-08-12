@@ -5,6 +5,7 @@ import { blue, yellow } from '@mui/material/colors';
 import { useContext, useMemo, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
 import { Settings } from '@mui/icons-material';
+import type { PlatformTotal } from '../../../data/summarizer';
 
 export const PlatformSection = () => {
 
@@ -13,16 +14,15 @@ export const PlatformSection = () => {
   const { viewSettings } = userData;
   const [showPlatformTimeAndGamesCombined, setShowPlatformTimeAndGamesCombined] = useState(true);
 
-  if (!summary) {
-    return null; // or some loading state
-  }
+  const sortedPlatformsByTotalGames = useMemo(() => {
+    if (!summary?.platformTotals) return null;
+    return [...summary?.platformTotals].sort((a, b) => b.totalGames - a.totalGames)
+  }, [summary?.platformTotals]);
+  const sortedPlatformsByTotalTime = useMemo(() => {
+    if (!summary?.platformTotals) return null;
+    return [...summary?.platformTotals].sort((a, b) => b.totalTime - a.totalTime)
+  }, [summary?.platformTotals]);
 
-  if (viewSettings.sectionVisibility.showPlatformSection) {
-    return null;
-  }
-
-  const sortedPlatformsByTotalGames = useMemo(() => summary.platformTotals.sort((a, b) => b.totalGames - a.totalGames), [summary.platformTotals]);
-  const sortedPlatformsByTotalTime = useMemo(() => [...summary.platformTotals].sort((a, b) => b.totalTime - a.totalTime), [summary.platformTotals]);
   const { editViewSettings } = useContext(DataContext);
   const [menuAnchor, setMenuAnchor] = useState(null);
   const menuOpen = Boolean(menuAnchor);
@@ -33,6 +33,14 @@ export const PlatformSection = () => {
     handleMenuClose();
   };
 
+  if (!summary) {
+    console.warn("No platform data available");
+    return null; // or some loading state
+  }
+
+  if (!viewSettings.sectionVisibility.showPlatformSection) {
+    return null;
+  }
   return (
     <Grid size={12}>
       <Card variant="outlined" sx={{ width: "100%" }}>
@@ -58,7 +66,7 @@ export const PlatformSection = () => {
             </Menu>
           </Stack>
           <Grid container spacing={2}>
-            {(!showPlatformTimeAndGamesCombined || !viewSettings.showPlaytimeStats) && (
+            {(!showPlatformTimeAndGamesCombined || !viewSettings.showPlaytimeStats) && sortedPlatformsByTotalGames?.length && (
               <>
                 <Grid size={{ md: 12, lg: 6 }}>
                   <Box>
@@ -74,7 +82,7 @@ export const PlatformSection = () => {
                     />
                   </Box>
                 </Grid>
-                {viewSettings.showPlaytimeStats && (
+                {viewSettings.showPlaytimeStats && sortedPlatformsByTotalTime?.length && (
                   <Grid size={{ md: 12, lg: 6 }}>
                     <Box>
                       <Typography style={{ textAlign: 'center' }}>Time Spent by Platform</Typography>
@@ -95,7 +103,7 @@ export const PlatformSection = () => {
                 )}
               </>
             )}
-            {showPlatformTimeAndGamesCombined && viewSettings.showPlaytimeStats && (
+            {showPlatformTimeAndGamesCombined && viewSettings.showPlaytimeStats && sortedPlatformsByTotalTime?.length && (
               <BarChart
                 dataset={sortedPlatformsByTotalTime as any}
                 yAxis={[{

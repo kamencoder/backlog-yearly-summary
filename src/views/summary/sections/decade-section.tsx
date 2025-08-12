@@ -41,6 +41,7 @@ export const DecadeSection = () => {
   if (!viewSettings.sectionVisibility.showDecadeSection) {
     return null;
   }
+
   return (
     <Grid size={12}>
       <Card variant="outlined">

@@ -11,12 +11,6 @@ export const AcquisitionsSection = () => {
   const dataContext = useContext(DataContext);
   const { summary, userData } = dataContext.data;
 
-  if (!summary) {
-    return null; // or some loading state
-  }
-  if (!userData.viewSettings.sectionVisibility.showAcquisitions) {
-    return null;
-  }
   const { editViewSettings } = dataContext;
   const [menuAnchor, setMenuAnchor] = useState(null);
   const menuOpen = Boolean(menuAnchor);
@@ -26,6 +20,13 @@ export const AcquisitionsSection = () => {
     editViewSettings({ sectionVisibility: { showAcquisitions: false } });
     handleMenuClose();
   };
+
+  if (!summary) {
+    return null; // or some loading state
+  }
+  if (!userData.viewSettings.sectionVisibility.showAcquisitions) {
+    return null;
+  }
 
   return (
     <Grid size={12}>

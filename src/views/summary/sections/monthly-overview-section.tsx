@@ -15,9 +15,6 @@ export const MonthlySection = () => {
   const { summary, userData } = dataContext.data;
   const { viewSettings } = userData;
 
-  if (!summary) {
-    return null; // or some loading state
-  }
   const { editViewSettings } = dataContext;
   const [menuAnchor, setMenuAnchor] = useState(null);
   const menuOpen = Boolean(menuAnchor);
@@ -28,8 +25,11 @@ export const MonthlySection = () => {
     handleMenuClose();
   };
 
+
+
   interface MonthSummary { gamesFinished: SummaryGameInfo[]; totalBeat: number; totalComplete: number; totalPlaytime: number; }
   const gamesByMonth = useMemo(() => {
+    if (!summary?.games) return null;
     const monthData = summary.games?.reduce((acc: Record<string, MonthSummary>, game) => {
       if (Object.keys(acc).length === 0) {
         for (let i = 1; i <= 12; i++) {
@@ -49,12 +49,15 @@ export const MonthlySection = () => {
       return acc;
     }, {} as Record<string, MonthSummary>) || {};
     return monthData;
-  }, [summary.games]);
+  }, [summary?.games]);
+
+  if (!summary || !gamesByMonth) {
+    return null;
+  }
 
   return (
     <>
       {viewSettings.sectionVisibility.showMonthlyOverview && (
-
         <Grid size={12}>
           <Card variant="outlined" sx={{ width: "100%" }}>
             <CardContent>

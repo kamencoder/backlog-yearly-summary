@@ -161,7 +161,7 @@ const getLengthGroupByTimePlayed = (timePlayed: number | null): LengthGroup => {
 }
 
 export const getYearSummary = (games: CsvData[], year: number): Summary => {
-  console.log('Generating year summary for year:', year);
+  console.info('Generating year summary for year:', year);
   const summary: Summary = {
     year,
     platformTotals: [],
@@ -356,7 +356,7 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     if (summary.totalTimeSpent > 0) {
       pt.percentOfTotalTime = Math.ceil((pt.totalTime / summary.totalTimeSpent) * 100) || 0;
     } else {
-      pt.percentOfTotalGames = 0;
+      pt.percentOfTotalTime = 0;
     }
   });
 

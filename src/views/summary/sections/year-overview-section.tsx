@@ -11,12 +11,11 @@ export const YearOverviewSection = () => {
   const dataContext = useContext(DataContext);
   const { summary, userData } = dataContext.data;
   const { viewSettings } = userData;
+  const totalTimeSpent = getPlayTimeInHours(summary?.totalTimeSpent || 0) || 0;
 
   if (!summary) {
     return null; // or some loading state
   }
-
-  const totalTimeSpent = getPlayTimeInHours(summary.totalTimeSpent) || 0;
 
   return (
     <Grid size={12}>

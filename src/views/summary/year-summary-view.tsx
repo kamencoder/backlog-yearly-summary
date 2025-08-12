@@ -12,8 +12,8 @@ import MonthlySection from './sections/monthly-overview-section';
 
 export const YearSummary = () => {
   const dataContext = useContext(DataContext);
-  const { summary, userData } = dataContext.data;
-  const { viewSettings } = userData;
+  const { summary } = dataContext.data;
+
   if (!summary) {
     return null;
   }
