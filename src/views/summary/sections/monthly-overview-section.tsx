@@ -104,8 +104,8 @@ export const MonthlySection = () => {
         </Grid>
       )}
       {viewSettings.sectionVisibility.showMonthlyGames && gamesByMonth && Object.keys(gamesByMonth).map(month => (
-        <Grid size={12}>
-          <Card variant="outlined" sx={{ marginBottom: '6px' }} key={month} >
+        <Grid size={12} key={month}>
+          <Card variant="outlined" sx={{ marginBottom: '6px' }} >
             <CardContent>
               <Typography key={month} variant="h6" fontWeight={600} style={{ textAlign: 'left' }} gutterBottom>{month}</Typography>
               <Grid size={12} container spacing={2} justifyContent="start">

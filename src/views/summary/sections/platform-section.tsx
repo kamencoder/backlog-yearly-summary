@@ -5,7 +5,6 @@ import { blue, yellow } from '@mui/material/colors';
 import { useContext, useMemo, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
 import { Settings } from '@mui/icons-material';
-import type { PlatformTotal } from '../../../data/summarizer';
 
 export const PlatformSection = () => {
 
@@ -47,22 +46,24 @@ export const PlatformSection = () => {
         <CardContent>
           <Stack direction={"row"}>
             <Typography flex={1} variant="h6" gutterBottom>Platforms</Typography>
-            {viewSettings.showPlaytimeStats &&
-              <FormControlLabel control={
-                <Switch
-                  size="small"
-                  checked={showPlatformTimeAndGamesCombined}
-                  onChange={e => setShowPlatformTimeAndGamesCombined(e.currentTarget.checked)}
-                />}
-                label="combined"
-              />
-            }
             <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
             <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
               <Settings />
             </IconButton>
             <Menu anchorEl={menuAnchor} open={menuOpen} onClose={handleMenuClose}>
               <MenuItem onClick={handleHide}>Hide</MenuItem>
+              {viewSettings.showPlaytimeStats &&
+                <MenuItem>
+                  <FormControlLabel control={
+                    <Switch
+                      size="small"
+                      checked={showPlatformTimeAndGamesCombined}
+                      onChange={e => setShowPlatformTimeAndGamesCombined(e.currentTarget.checked)}
+                    />}
+                    label="combined"
+                  />
+                </MenuItem>
+              }
             </Menu>
           </Stack>
           <Grid container spacing={2}>
