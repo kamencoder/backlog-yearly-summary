@@ -14,7 +14,7 @@ export interface ViewSectionSettings {
   platform: PlatformViewSectionSettings;
   gameLength: BaseViewSectionSettings;
   decade: BaseViewSectionSettings;
-  acquisitions: BaseViewSectionSettings;
+  acquisitions: AcquisitionSectionSettings;
   monthly: BaseViewSectionSettings;
 }
 
@@ -23,6 +23,10 @@ export interface BaseViewSectionSettings {
 }
 export interface PlatformViewSectionSettings extends BaseViewSectionSettings {
   showPlatformTimeAndGamesCombined: boolean;
+}
+export interface AcquisitionSectionSettings extends BaseViewSectionSettings {
+  showSources: boolean;
+  showCosts: boolean;
 }
 
 export interface ViewSettings {
@@ -63,7 +67,7 @@ export const defaultContext: DataContextProps = {
           platform: { visible: true, showPlatformTimeAndGamesCombined: true },
           gameLength: { visible: true },
           decade: { visible: true },
-          acquisitions: { visible: true },
+          acquisitions: { visible: true, showCosts: true, showSources: true },
           monthly: { visible: true },
         },
         showPlaytimeStats: true,

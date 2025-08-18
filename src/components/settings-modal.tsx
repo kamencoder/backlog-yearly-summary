@@ -15,6 +15,12 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
   const setPlatformCombineTotalsAndTime = (value: boolean) => {
     setSectionSettings({ ...sectionSettings, platform: { ...sectionSettings.platform, showPlatformTimeAndGamesCombined: value } });
   }
+  const setShowAcquisitionSources = (value: boolean) => {
+    setSectionSettings({ ...sectionSettings, acquisitions: { ...sectionSettings.acquisitions, showSources: value } });
+  }
+  const setShowCosts = (value: boolean) => {
+    setSectionSettings({ ...sectionSettings, acquisitions: { ...sectionSettings.acquisitions, showCosts: value } });
+  }
 
   const handleSave = () => {
     dataContext.editViewSettings({
@@ -29,9 +35,9 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       <DialogContent >
         <Typography variant="h5" gutterBottom>Settings</Typography>
         <FormGroup>
-          <Typography fontWeight={700} marginBottom={0.5} sx={{ mt: 2 }}>General</Typography>
+          <Typography fontWeight={700} fontSize={18} marginBottom={0.5} sx={{ mt: 2 }}>General</Typography>
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ ml: 3 }}
             control={
               <Checkbox
                 checked={showPlaytimeStats}
@@ -53,19 +59,18 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
         </FormGroup>
         <Divider />
         <FormGroup>
-          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Platform Section</Typography>
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ mt: 1 }}
             control={
               <Checkbox
                 checked={sectionSettings.platform.visible}
                 onChange={handleSectionVisibilityChange('platform' as keyof typeof sectionSettings)}
               />
             }
-            label="Visible"
+            label={<Typography fontWeight={700} fontSize={18}>Platform Section</Typography>}
           />
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ ml: 3 }}
             control={
               <Checkbox
                 disabled={!showPlaytimeStats}
@@ -75,10 +80,8 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
             }
             label="Combine Totals and Time"
           />
-          <Divider />
-          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Game Length Section</Typography>
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ mt: 1 }}
             control={
               <Checkbox
                 disabled={!showPlaytimeStats}
@@ -86,43 +89,57 @@ const SettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
                 onChange={handleSectionVisibilityChange('gameLength' as keyof typeof sectionSettings)}
               />
             }
-            label="Visible"
+            label={<Typography fontWeight={700} fontSize={18}>Game Length Section</Typography>}
           />
-          <Divider />
-          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Decade Section</Typography>
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ mt: 1 }}
             control={
               <Checkbox
                 checked={sectionSettings.decade.visible}
                 onChange={handleSectionVisibilityChange('decade' as keyof typeof sectionSettings)}
               />
             }
-            label="Visible"
+            label={<Typography fontWeight={700} fontSize={18}>Decade Section</Typography>}
           />
-          <Divider />
-          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Backlog Additions</Typography>
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ mt: 1 }}
             control={
               <Checkbox
                 checked={sectionSettings.acquisitions.visible}
                 onChange={handleSectionVisibilityChange('acquisitions' as keyof typeof sectionSettings)}
               />
             }
-            label="Visible"
+            label={<Typography fontWeight={700} fontSize={18}>Backlog Additions</Typography>}
           />
-          <Divider />
-          <Typography fontWeight={700} marginTop={2} marginBottom={0.5}>Monthly Overview</Typography>
           <FormControlLabel
-            sx={{ ml: 1 }}
+            sx={{ ml: 3 }}
+            control={
+              <Checkbox
+                checked={sectionSettings.acquisitions.showSources}
+                onChange={e => setShowAcquisitionSources(e.target.checked)}
+              />
+            }
+            label="Show Sources"
+          />
+          <FormControlLabel
+            sx={{ ml: 3 }}
+            control={
+              <Checkbox
+                checked={sectionSettings.acquisitions.showCosts}
+                onChange={e => setShowCosts(e.target.checked)}
+              />
+            }
+            label="Show Costs"
+          />
+          <FormControlLabel
+            sx={{ mt: 1 }}
             control={
               <Checkbox
                 checked={sectionSettings.monthly.visible}
                 onChange={handleSectionVisibilityChange('monthly' as keyof typeof sectionSettings)}
               />
             }
-            label="Visible"
+            label={<Typography fontWeight={700} fontSize={18}>Monthly Overview</Typography>}
           />
         </FormGroup>
       </DialogContent>

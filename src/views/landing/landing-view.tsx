@@ -71,13 +71,13 @@ const DataImporter = () => {
           >
             <Typography variant='subtitle1'>Infinite Backlog</Typography>
             <Typography variant='h2' textAlign="center" gutterBottom>Yearly Summary</Typography>
-            <Box sx={{ alignItems: "left" }} >
+            <Box sx={{ alignItems: "left", maxWidth: "400px" }} >
               <List >
                 <ListItem>
                   <Typography variant='body2'>1. Navigate to <Link href="https://infinitebacklog.net/settings/export" target="_blank" rel="noreferrer">Infinite Backlog Export Page</Link></Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography variant='body2'>2. Click "Export Collection" to get a CSV file</Typography>
+                  <Typography variant='body2'>2. Click "Export Collection" to get a CSV file. You can edit this file if you want, but do not rearrange the rows.</Typography>
                 </ListItem>
                 <ListItem>
                   <Typography variant='body2'>3. Click Load CSV here and import the CSV file</Typography>

@@ -109,6 +109,7 @@ export const Game = (props: GameProps) => {
               {viewSettings.showPlaytimeStats && (
                 <Typography variant="body2">
                   {!game.playTime ? '⠀' : getPlayTimeInHours(game.playTime, 1) + ((game.playTime || 0) > 1 ? ' hrs' : ' hr')}
+                  {game.playTimeIsEstimatedAverage ? '*' : ''}
                 </Typography>
               )}
               <Rating size={"small"} name="game-rating" value={game.rating} precision={0.5} readOnly />

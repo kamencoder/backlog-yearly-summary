@@ -1,7 +1,7 @@
 import { Typography, Box } from "@mui/material"
 
 export interface SingleStatProps {
-  value: string | number;
+  value: string | number | null;
   label: string;
   color?: string;
 }

@@ -113,6 +113,13 @@ export const MonthlySection = () => {
           </Card>
         </Grid>
       ))}
+      {
+        summary.games.some(g => g.finishedThisYear && g.playTimeIsEstimatedAverage)
+          ? <Typography variant="caption">
+            * Play time for this bundled game was estimated using the bundle playtime divided by the number of games finished. For more accurate numbers, enter playtime directly for each bundled game.
+          </Typography>
+          : null
+      }
     </>
   );
 }

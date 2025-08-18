@@ -2,28 +2,6 @@ import type { CsvData } from "./data-context";
 import { DateTime } from "luxon";
 import { platforms } from "./platforms";
 
-// YEARLY SUMMARY
-// Games finished (beat or complete)
-// PLATFORMS:
-//   - Total Unique (Number)
-//   - Games finished by platform (Pie)
-// RELEASE YEARS:
-//   - Time Traveler Ranking (S,A,B,C,D,F) based on decades explored
-//   - Time Preference (Modern, Vintage, Mixed)
-//   - Games finished by decade (Bar)
-// TIME SPENT:
-//   - Total time spent (Number)
-//   - Average time spent per game (Number)
-//   - Games finished by length group (Bar)
-// 
-// { [year]: { platform: { [platform]: number } }  }
-// Top 5 games (ranked by rating)
-// ACQUISITIONS:
-//   - Total games acquired (Number)
-//      - Games played
-//      - Games beaten, completed, dropped, or continuous
-
-
 const SummaryGroupWindowEnum = {
   month: 'month',
   year: 'year',
@@ -44,6 +22,14 @@ export interface PlatformTotal {
   totalTimeHours: number;
   percentOfTotalGames: number; // Optional, can be calculated later
   percentOfTotalTime: number; // Optional, can be calculated later
+};
+
+export interface AcquisitionSourceTotal {
+  acquisitionSource: string;
+  totalGames: number;
+  totalCost: number;
+  percentOfTotalGames?: number; // Optional, can be calculated later
+  percentOfTotalCost?: number; // Optional, can be calculated later
 };
 
 const LengthGroupEnum = {
@@ -75,14 +61,24 @@ export type SummaryGameInfo = {
   status: string;
   completion: string;
   releaseYear: number | null;
+  releaseDecade: number; // 0 if unknown
+  acquisitionDateRaw: string | null; // ISO format
   acquisitionDate: string | null;
   acquisitionMonth: string | null;
   acquiredThisYear: boolean;
+  acquisitionType: string | null;
+  acquisitionSource: string;
+  completionDateRaw: string | null; // ISO format
   completionDate: string | null;
   completionMonth: string | null;
+  finishedThisYear: boolean;
   playTime: number | null;
+  playTimeIsEstimatedAverage: boolean | null;
   coverImage: string | null;
   rating: number | null;
+  amountPaid: number | null;
+  parentGameId?: string; // Only used for bundled games that are children.
+  bundleInfo: BundleInfo | null; // Only used for bundled games that are parents.  
 }
 
 export type LengthGroup = typeof LengthGroupEnum[keyof typeof LengthGroupEnum];
@@ -100,16 +96,25 @@ export interface AcquisitionSummary {
   totalBeaten: number;
   totalCompleted: number;
   totalContinuous: number;
+  totalMoneySpent: number;
   percentPlayed: number;
   percentFinished: number;
 }
 
+interface BundleInfo {
+  childGameIds: string[];
+  totalGames: number; // Total games in the bundle
+  totalFinished: number; // Total finished games in the bundle
+  avgTimePerGame: number;
+  avgCostPerGame: number;
+}
 
 export interface Summary {
   year: number;
   platformTotals: PlatformTotal[];
   lengthGroupTotals: LengthGroupTotal[];
   releaseDecadeTotals: ReleaseDecadeTotal[];
+  acquisitionSourceTotals: AcquisitionSourceTotal[];
   totalGamesBeaten: number;
   totalGamesCompeleted: number;
   totalTimeSpent: number;
@@ -160,6 +165,110 @@ const getLengthGroupByTimePlayed = (timePlayed: number | null): LengthGroup => {
   }
 }
 
+const getGameSummary = (game: CsvData, i: number, year: number, parentGame: SummaryGameInfo | null): SummaryGameInfo => {
+  const id = game['IGDB ID']?.toString() || `unknown_${i}`;
+  const title = game['Game name']?.toString() || 'Unknown Title';
+  let platform = game['Platform']?.toString();
+  const releaseDateRaw = game['Game release date']?.toString() || null;
+  const releaseDate = releaseDateRaw ? DateTime.fromISO(releaseDateRaw) : null;
+  const releaseYear = (releaseDate && releaseDate.isValid) ? releaseDate.year : null;
+  const releaseDecade = releaseYear ? getDecadeFromYear(releaseYear) : 0;
+  let completion = game['Completion']?.toString() || 'Unknown';
+  let status = game['Status']?.toString() || null;
+  let acquisitionDateRaw = game['Acquisition date']?.toString() || null;
+  let acquisitionType = game['Acquisition']?.toString() || null;
+  let acquisitionSource = game['Acquisition Source']?.toString() || null;
+  const amountPaidRaw = game['Amount paid']?.toString() || null;
+  let amountPaid = amountPaidRaw ? parseFloat(amountPaidRaw) / 100 : 0;
+  const additionalCostRaw = game['Additional Cost']?.toString() || null;
+  let additionalCost = additionalCostRaw ? parseFloat(additionalCostRaw) / 100 : 0;
+
+
+  let completionDateRaw = game['Completion date']?.toString() || null;
+  let playTime = game['Playtime'] ? parseInt(game['Playtime'].toString()) : null
+  let playTimeIsEstimatedAverage = false;
+  const type = game['Type']?.toString(); // (Bundled Game)
+  const coverImage = game['Cover']?.toString() || null;
+  const ratingRaw = game['Rating (Score)']?.toString();
+  const rating = ratingRaw ? parseFloat(ratingRaw) / 2 : null; // comes in as 10 point raiting, need 
+
+  const isBundleChild = type === 'Bundled Game';
+  if (isBundleChild) {
+    if (!status) { // There is no status for bundled child games, derive from completion value if possible.
+      if (completion === 'Beaten' || completion === 'Completed' || completion === 'Continuous' || completion === 'Dropped' || completion === 'Unfinished') {
+        status = 'Played';
+      }
+    }
+    // Currently for game bundles, the parent game will have a record and all games that are part of that bundle will be right after it. 
+    if (parentGame) {
+      platform = platform || parentGame.platform;
+      completion = completion || parentGame.completion;
+      completionDateRaw = completionDateRaw || parentGame.completionDateRaw;
+      acquisitionDateRaw = acquisitionDateRaw || parentGame.acquisitionDateRaw;
+      acquisitionType = acquisitionType || parentGame.acquisitionType
+      acquisitionSource = acquisitionSource || parentGame.acquisitionSource;
+      status = status || parentGame.status;
+      amountPaid = parentGame?.bundleInfo?.avgCostPerGame || 0;
+      additionalCost = 0; // Already combined in avgCostPerGame
+
+      if (!game['Playtime']) {
+        // If the child game has no playtime, use the bundle average playtime per game.
+        playTimeIsEstimatedAverage = true;
+        playTime = parentGame.bundleInfo?.avgTimePerGame || null;
+      }
+    } else {
+      console.warn(`Bundle child game ${title} has no parent game`);
+    }
+  }
+  if (!platform) {
+    platform = 'Unknown'; // Set to unknown if we still don't have a platform.
+  }
+  if (!acquisitionSource) {
+    acquisitionSource = 'Unknown';
+  }
+  if (!status) {
+    status = 'Unknown';
+  }
+
+  const completionDate = completionDateRaw ? DateTime.fromISO(completionDateRaw, { setZone: true }) : null;
+  const completionYear = completionDate?.year;
+  const finishedThisYear = Boolean(completionYear && completionYear >= year && completionYear < (year + 1));
+  const acquisitionDate = acquisitionDateRaw ? DateTime.fromISO(acquisitionDateRaw, { setZone: true }) : null;
+  const acquisitionYear = acquisitionDate?.year
+  const acquiredThisYear = Boolean(acquisitionYear && acquisitionYear >= year && acquisitionYear < (year + 1));
+  const platformAbbreviation = platforms.find(p => p.name === platform)?.abbreviation || platform;
+
+
+  const gameSummary: SummaryGameInfo = {
+    id,
+    title,
+    platform,
+    platformAbbreviation,
+    status,
+    completion,
+    releaseYear,
+    releaseDecade,
+    acquisitionDateRaw,
+    acquisitionDate: acquisitionDate?.toFormat('MMM dd') || null,
+    acquisitionMonth: acquisitionDate ? acquisitionDate.monthLong : null,
+    acquisitionSource: acquisitionSource,
+    acquisitionType: acquisitionType || null,
+    acquiredThisYear,
+    completionDateRaw,
+    completionDate: completionDate?.toFormat('MMM dd') || null,
+    completionMonth: completionDate ? completionDate.monthLong : null,
+    amountPaid: amountPaid + additionalCost,
+    finishedThisYear,
+    playTime,
+    playTimeIsEstimatedAverage,
+    coverImage,
+    rating,
+    parentGameId: parentGame?.id,
+    bundleInfo: null,
+  };
+  return gameSummary
+}
+
 export const getYearSummary = (games: CsvData[], year: number): Summary => {
   console.info('Generating year summary for year:', year);
   const summary: Summary = {
@@ -167,6 +276,7 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     platformTotals: [],
     lengthGroupTotals: [],
     releaseDecadeTotals: [],
+    acquisitionSourceTotals: [],
     totalGamesBeaten: 0,
     totalGamesCompeleted: 0,
     totalTimeSpent: 0,
@@ -179,6 +289,7 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       totalBeaten: 0,
       totalCompleted: 0,
       totalContinuous: 0,
+      totalMoneySpent: 0,
       percentPlayed: 0,
       percentFinished: 0,
     },
@@ -186,98 +297,75 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     games: [],
   }
 
-  const getBundleParentGame = (games: CsvData[], childGameIndex: number) => {
-    if (childGameIndex === 0) return null;
+  const getBundleInfo = (parentGame: SummaryGameInfo, parentGameIndex: number) => {
+    if (parentGameIndex === games.length - 1) return null;
 
-    for (let i = childGameIndex - 1; i--;) {
-      if (games[i]?.['Type']?.toString() !== 'Bundled Game') {
-        return games[i];
+    const bundleInfo: BundleInfo = {
+      childGameIds: [],
+      totalFinished: 0,
+      totalGames: 0,
+      avgTimePerGame: 0,
+      avgCostPerGame: 0,
+    };
+
+    for (let i = parentGameIndex + 1; i < games.length; i++) {
+      const childGame = games[i];
+      const isBundleChild = childGame?.['Type']?.toString() === 'Bundled Game';
+      if (isBundleChild) {
+        const childGameInfo = getGameSummary(games[i], i, year, parentGame);
+        bundleInfo.childGameIds.push(childGameInfo.id);
+        bundleInfo.totalGames += 1;
+        bundleInfo.totalFinished += (childGameInfo.finishedThisYear ? 1 : 0);
+      } else {
+        break;
       }
     }
+    bundleInfo.avgCostPerGame = parentGame.amountPaid ? (parentGame.amountPaid / bundleInfo.totalGames) : 0;
+    bundleInfo.avgTimePerGame = parentGame.playTime ? (parentGame.playTime / (bundleInfo.totalFinished || 1)) : 0;
+
+    return bundleInfo || null;
   }
 
+  const parentGameBundles: SummaryGameInfo[] = [];
+
   games.forEach((game, i) => {
-    const nextGame = games.length > i + 1 ? games[i + 1] : null;
     const id = game['IGDB ID']?.toString() || `unknown_${i}`;
-    const title = game['Game name']?.toString() || 'Unknown Title';
-    let platform = game['Platform']?.toString();
-    const releaseDateRaw = game['Game release date']?.toString();
-    const releaseDate = releaseDateRaw ? DateTime.fromISO(releaseDateRaw) : null;
-    const releaseYear = (releaseDate && releaseDate.isValid) ? releaseDate.year : null;
-    const releaseDecade = releaseYear ? getDecadeFromYear(releaseYear) : 0;
-    const completion = game['Completion']?.toString() || 'Unknown';
-    let status = game['Status']?.toString() || 'Unknown';
-    let acquisitionDateRaw = game['Acquisition date']?.toString();
-
-    let completionDateRaw = game['Completion date']?.toString();
-    const playTime = game['Playtime'] ? parseInt(game['Playtime'].toString()) : null
-    const type = game['Type']?.toString(); // (Bundled Game)
-    const coverImage = game['Cover']?.toString() || null;
-    const ratingRaw = game['Rating (Score)']?.toString();
-    const rating = ratingRaw ? parseFloat(ratingRaw) / 2 : null; // comes in as 10 point raiting, need 
-
+    const type = game['Type']?.toString(); // (Bundled Game, DLC / Expansion)
+    const nextGame = games.length > i + 1 ? games[i + 1] : null;
     const isBundleParent = type !== 'Bundled Game' && nextGame?.['Type']?.toString() === 'Bundled Game';
-    if (isBundleParent) {
-      return; // Skip parent
-    }
-
     const isBundleChild = type === 'Bundled Game';
-    if (isBundleChild) {
-      if (!status) { // There is no status for bundled child games, derive from completion value if possible.
-        if (completion === 'Beaten' || completion === 'Completed' || completion === 'Continuous' || completion === 'Dropped' || completion === 'Unfinished') {
-          status = 'Played';
-        }
-      }
-      // Currently for game bundles, the parent game will have a record and all games that are part of that bundle will be right after it. 
-      const parentGame = getBundleParentGame(games, i);
-      if (parentGame) {
-        platform = platform || parentGame?.['Platform']?.toString();
-        completionDateRaw = completionDateRaw || parentGame?.['Completion date']?.toString();
-        acquisitionDateRaw = acquisitionDateRaw || parentGame?.['Acquisition date']?.toString();
-        status = status || parentGame?.['Status']?.toString() || '';
-      } else {
-        console.warn(`Bundle child game ${title} has no parent game`);
-      }
+    const isDLC = type === 'DLC / Expansion';
 
-    }
-    if (!platform) {
-      platform = 'Unknown'; // Set to unknown if we still don't have a platform.
+    const parentGame = isBundleChild && parentGameBundles.find(pg => pg.bundleInfo?.childGameIds?.includes(id)) || null;
+    const gameSummary = getGameSummary(game, i, year, parentGame);
+
+    if (gameSummary.status === 'No Status' || isDLC) {
+      return; // Skip no status and dlc
     }
 
-    if (status === 'No Status') {
-      return; // Skip no status
-    }
-
-    const completionDate = completionDateRaw ? DateTime.fromISO(completionDateRaw, { setZone: true }) : null;
-    const completionYear = completionDate?.year;
-    const acquisitionDate = acquisitionDateRaw ? DateTime.fromISO(acquisitionDateRaw, { setZone: true }) : null;
-    const acquisitionYear = acquisitionDate?.year
-    const platformAbbreviation = platforms.find(p => p.name === platform)?.abbreviation || platform;
-
-    let gameIncluded = false;
-    if (completionYear && completionYear >= year && completionYear < (year + 1)) {
-      gameIncluded = true;
-      if (completion === 'Beaten') {
+    // Update completion totals
+    if (gameSummary.finishedThisYear && !isBundleParent) {
+      if (gameSummary.completion === 'Beaten') {
         summary.totalGamesBeaten += 1;
-      } else if (completion === 'Completed') {
+      } else if (gameSummary.completion === 'Completed') {
         summary.totalGamesCompeleted += 1;
       }
 
-      if (playTime) {
-        summary.totalTimeSpent += playTime;
+      if (gameSummary.playTime) {
+        summary.totalTimeSpent += gameSummary.playTime;
       }
 
       // Update platform totals
-      const platformTotal = summary.platformTotals.find(pt => pt.platform === platform);
+      const platformTotal = summary.platformTotals.find(pt => pt.platform === gameSummary.platform);
       if (platformTotal) {
         platformTotal.totalGames += 1;
-        platformTotal.totalTime += playTime || 0;
+        platformTotal.totalTime += gameSummary.playTime || 0;
       } else {
         summary.platformTotals.push({
-          platform,
-          platformAbbreviation,
+          platform: gameSummary.platform,
+          platformAbbreviation: gameSummary.platformAbbreviation,
           totalGames: 1,
-          totalTime: playTime || 0,
+          totalTime: gameSummary.playTime || 0,
           totalTimeHours: 0, // will be calculated later
           percentOfTotalGames: 0, // will be calculated later
           percentOfTotalTime: 0, // will be calculated later
@@ -285,62 +373,69 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
       }
 
       // Update length group totals
-      let lengthGroup = getLengthGroupByTimePlayed(playTime);
+      let lengthGroup = getLengthGroupByTimePlayed(gameSummary.playTime);
       const lengthTotal = summary.lengthGroupTotals.find(lt => lt.lengthGroup === lengthGroup);
       if (lengthTotal) {
         lengthTotal.totalGames += 1;
-        lengthTotal.totalTimeSpent += playTime || 0;
+        lengthTotal.totalTimeSpent += gameSummary.playTime || 0;
       } else {
-        summary.lengthGroupTotals.push({ lengthGroup, totalGames: 1, totalTimeSpent: playTime || 0 });
+        summary.lengthGroupTotals.push({ lengthGroup, totalGames: 1, totalTimeSpent: gameSummary.playTime || 0 });
       }
 
       // Update release decade totals
-      const decadeLabel = releaseDecade ? `${releaseDecade}s` : 'Unknown';
-      const decadeTotal = summary.releaseDecadeTotals.find(yr => yr.decade === releaseDecade);
+      const decadeLabel = gameSummary.releaseDecade ? `${gameSummary.releaseDecade}s` : 'Unknown';
+      const decadeTotal = summary.releaseDecadeTotals.find(yr => yr.decade === gameSummary.releaseDecade);
       if (decadeTotal) {
         decadeTotal.totalGames += 1;
-        decadeTotal.totalTime += playTime || 0;
+        decadeTotal.totalTime += gameSummary.playTime || 0;
       } else {
         summary.releaseDecadeTotals.push({
-          decade: releaseDecade,
+          decade: gameSummary.releaseDecade,
           decadeLabel,
           totalGames: 1,
-          totalTime: playTime || 0,
+          totalTime: gameSummary.playTime || 0,
         });
       }
     }
 
-    let acquiredThisYear = false;
-    if (acquisitionYear && acquisitionYear >= year && acquisitionYear < (year + 1)) {
-      gameIncluded = true;
-      acquiredThisYear = true;
+    // Update acquisition totals
+    if (gameSummary.acquiredThisYear && !isBundleParent) {
       summary.acquisitions.totalAcquired += 1;
-      summary.acquisitions.totalBeaten += (completion === 'Beaten' ? 1 : 0);
-      summary.acquisitions.totalCompleted += (completion === 'Completed' ? 1 : 0);
-      summary.acquisitions.totalDropped += (completion === 'Dropped' ? 1 : 0);
-      summary.acquisitions.totalContinuous += (completion === 'Continuous' ? 1 : 0);
-      summary.acquisitions.totalFinished += (['Beaten', 'Completed', 'Continuous', 'Dropped'].includes(completion) ? 1 : 0);
-      summary.acquisitions.totalPlayed += (status === 'Played' || status === 'Playing' ? 1 : 0);
+      summary.acquisitions.totalBeaten += (gameSummary.completion === 'Beaten' ? 1 : 0);
+      summary.acquisitions.totalCompleted += (gameSummary.completion === 'Completed' ? 1 : 0);
+      summary.acquisitions.totalDropped += (gameSummary.completion === 'Dropped' ? 1 : 0);
+      summary.acquisitions.totalContinuous += (gameSummary.completion === 'Continuous' ? 1 : 0);
+      summary.acquisitions.totalFinished += (['Beaten', 'Completed', 'Continuous', 'Dropped'].includes(gameSummary.completion) ? 1 : 0);
+      summary.acquisitions.totalPlayed += (gameSummary.status === 'Played' || gameSummary.status === 'Playing' ? 1 : 0);
+
+      if (gameSummary.amountPaid && !isNaN(gameSummary.amountPaid)) {
+        summary.acquisitions.totalMoneySpent += (gameSummary.amountPaid || 0);
+      }
+
+      // Update acquisition source totals
+      const acquisitionTotal = summary.acquisitionSourceTotals.find(pt => pt.acquisitionSource === gameSummary.acquisitionSource);
+      if (acquisitionTotal) {
+        acquisitionTotal.totalGames += 1;
+        acquisitionTotal.totalCost += gameSummary.amountPaid || 0;
+      } else {
+        summary.acquisitionSourceTotals.push({
+          acquisitionSource: gameSummary.acquisitionSource,
+          totalGames: 1,
+          totalCost: gameSummary.amountPaid || 0,
+          percentOfTotalGames: 0, // will be calculated later
+          percentOfTotalCost: 0, // will be calculated later
+        });
+      }
     }
 
-    if (gameIncluded) {
-      summary.games.push({
-        id,
-        title,
-        platform,
-        platformAbbreviation,
-        status,
-        completion,
-        releaseYear,
-        acquisitionDate: acquisitionDate?.toFormat('MMM dd') || null,
-        acquisitionMonth: acquisitionDate ? acquisitionDate.monthLong : null,
-        completionDate: completionDate?.toFormat('MMM dd') || null,
-        completionMonth: completionDate ? completionDate.monthLong : null,
-        playTime,
-        coverImage,
-        acquiredThisYear,
-        rating
-      });
+
+    if (isBundleParent) {
+      gameSummary.bundleInfo = getBundleInfo(gameSummary, i);
+      parentGameBundles.push(gameSummary)
+    } else {
+      if (gameSummary.finishedThisYear || gameSummary.acquiredThisYear) {
+        summary.games.push(gameSummary);
+      }
     }
   });
 
@@ -390,6 +485,10 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
   if (summary.acquisitions.totalAcquired > 0) {
     summary.acquisitions.percentPlayed = Math.round((summary?.acquisitions.totalPlayed / summary.acquisitions.totalAcquired) * 100)
     summary.acquisitions.percentFinished = Math.round((summary?.acquisitions.totalFinished / summary.acquisitions.totalAcquired) * 100)
+    summary.acquisitionSourceTotals.forEach(ast => {
+      ast.percentOfTotalCost = Math.ceil((summary.acquisitions.totalMoneySpent ? ast.totalCost / summary.acquisitions.totalMoneySpent : 0) * 100)
+      ast.percentOfTotalGames = Math.ceil((summary.acquisitions.totalAcquired ? ast.totalGames / summary.acquisitions.totalAcquired : 0) * 100);
+    })
   }
 
 
