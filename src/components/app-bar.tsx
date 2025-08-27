@@ -62,7 +62,7 @@ export default function AppBar() {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1, maxWidth: '976px', margin: 'auto' }}>
         <MuiAppBar position="static">
           <Toolbar>
             <IconButton
