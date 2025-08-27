@@ -3,7 +3,7 @@ import InfoIcon from '../../../components/info-icon';
 import { SingleStat } from '../../../components/single-stat';
 import { AcquisitionGuage } from '../../../components/acquisition-guage';
 import { Warning, ExpandMore, Settings } from '@mui/icons-material';
-import { red, yellow, green, blue } from '@mui/material/colors';
+import { red, yellow, green, blue, purple } from '@mui/material/colors';
 import { useContext, useMemo, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
 import { formatCurrency } from '../../../data/formatters';
@@ -45,7 +45,7 @@ export const AcquisitionsSection = () => {
         <CardContent>
           <Stack direction={"row"}>
             <Typography flex={1} variant="h6" gutterBottom>Backlog Additions</Typography>
-            <InfoIcon text="Includes games acquired within this year based on the Acquisition Date set on the game in IB. The number of games played includes total number of games among those acquired this year which are marked as playing or played. The number of games finished includes total number of those acquired this year which are marked beaten or completed." />
+            <InfoIcon text="Includes games acquired within this year based on the Acquisition Date set on the game in IB. The number of games played includes total number of games among those acquired this year which are marked as playing or played. The total number acquired includes all games with an aquisition date this year. The total number of 'backlogged' games excludes those with No Status and any DLC games. The number of games finished includes total number of those acquired this year which are marked beaten or completed." />
             <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
               <Settings />
             </IconButton>
@@ -79,14 +79,19 @@ export const AcquisitionsSection = () => {
             </Alert>
           )}
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 12, md: 2 }}>
-              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "column" }} justifyContent={"center"} flexWrap="wrap">
-                <SingleStat value={summary.acquisitions.totalAcquired} label="Acquired" color={red[500]} />
+            <Grid size={{ xs: 12, sm: 12, md: 3 }} flexWrap={"wrap"}>
+              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "row" }} justifyContent={"center"} flexWrap="wrap">
+                <SingleStat value={summary.acquisitions.totalAcquired} label="Acquired" color={purple[300]} />
+                <SingleStat value={summary.acquisitions.totalAddedToBacklog} label="Backlogged" color={red[500]} />
+              </Stack>
+              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "row" }} justifyContent={"center"} flexWrap="wrap">
                 <SingleStat value={summary.acquisitions.totalPlayed} label="Played" color={yellow[700]} />
-                <SingleStat value={summary.acquisitions.totalFinished} label="Finished" color={green[500]} />
+                <SingleStat value={summary.acquisitions.totalBeaten + summary.acquisitions.totalCompleted} label="Finished" color={green[500]} />
+                <SingleStat value={summary.acquisitions.totalContinuous} label="Continuous" color={green[900]} />
+                <SingleStat value={summary.acquisitions.totalDropped} label="Dropped" color={green[900]} />
               </Stack>
             </Grid>
-            <Grid size={{ xs: 12, sm: 12, md: 10 }} display={"flex"} justifyContent={"center"}>
+            <Grid size={{ xs: 12, sm: 12, md: 9 }} display={"flex"} justifyContent={"center"}>
               <AcquisitionGuage acquisitionSummary={summary.acquisitions} />
             </Grid>
 
@@ -149,7 +154,7 @@ export const AcquisitionsSection = () => {
                       <TableBody>
                         {gamesAcquired?.map(g => (
                           <TableRow key={g.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell component="th" scope="row">{g.title}</TableCell>
+                            <TableCell component="th" scope="row">{g.title}{g.type === "DLC / Expansion" ? ' [DLC]' : ''}</TableCell>
                             <TableCell>{g.platform}</TableCell>
                             {sectionSettings.showCosts && <TableCell>{formatCurrency(g.amountPaid)}</TableCell>}
                             {sectionSettings.showSources && <TableCell>{g.acquisitionSource}</TableCell>}

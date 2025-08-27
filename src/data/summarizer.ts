@@ -56,6 +56,7 @@ const LengthGroupSorting = {
 export type SummaryGameInfo = {
   id: string;
   title: string;
+  type: string;
   platform: string;
   platformAbbreviation: string;
   status: string;
@@ -90,12 +91,14 @@ export interface LengthGroupTotal {
 
 export interface AcquisitionSummary {
   totalAcquired: number;
+  totalAddedToBacklog: number; // Excludes no status games and dlc
   totalPlayed: number;
   totalFinished: number; // Beaten, Completed, Dropped, Continuous
   totalDropped: number;
   totalBeaten: number;
   totalCompleted: number;
   totalContinuous: number;
+  totalExcluded: number;
   totalMoneySpent: number;
   percentPlayed: number;
   percentFinished: number;
@@ -242,6 +245,7 @@ const getGameSummary = (game: CsvData, i: number, year: number, parentGame: Summ
   const gameSummary: SummaryGameInfo = {
     id,
     title,
+    type,
     platform,
     platformAbbreviation,
     status,
@@ -283,12 +287,14 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     averageTimeSpent: 0,
     acquisitions: {
       totalAcquired: 0,
+      totalAddedToBacklog: 0,
       totalPlayed: 0,
       totalFinished: 0, // Beaten, Completed, Dropped, Continuous
       totalDropped: 0,
       totalBeaten: 0,
       totalCompleted: 0,
       totalContinuous: 0,
+      totalExcluded: 0,
       totalMoneySpent: 0,
       percentPlayed: 0,
       percentFinished: 0,
@@ -339,12 +345,10 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     const parentGame = isBundleChild && parentGameBundles.find(pg => pg.bundleInfo?.childGameIds?.includes(id)) || null;
     const gameSummary = getGameSummary(game, i, year, parentGame);
 
-    if (gameSummary.status === 'No Status' || isDLC) {
-      return; // Skip no status and dlc
-    }
+    const excludeFromStats = gameSummary.status === 'No Status' || isDLC;
 
     // Update completion totals
-    if (gameSummary.finishedThisYear && !isBundleParent) {
+    if (gameSummary.finishedThisYear && !isBundleParent && !excludeFromStats) {
       if (gameSummary.completion === 'Beaten') {
         summary.totalGamesBeaten += 1;
       } else if (gameSummary.completion === 'Completed') {
@@ -401,12 +405,17 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
     // Update acquisition totals
     if (gameSummary.acquiredThisYear && !isBundleParent) {
       summary.acquisitions.totalAcquired += 1;
-      summary.acquisitions.totalBeaten += (gameSummary.completion === 'Beaten' ? 1 : 0);
-      summary.acquisitions.totalCompleted += (gameSummary.completion === 'Completed' ? 1 : 0);
-      summary.acquisitions.totalDropped += (gameSummary.completion === 'Dropped' ? 1 : 0);
-      summary.acquisitions.totalContinuous += (gameSummary.completion === 'Continuous' ? 1 : 0);
-      summary.acquisitions.totalFinished += (['Beaten', 'Completed', 'Continuous', 'Dropped'].includes(gameSummary.completion) ? 1 : 0);
-      summary.acquisitions.totalPlayed += (gameSummary.status === 'Played' || gameSummary.status === 'Playing' ? 1 : 0);
+      summary.acquisitions.totalAddedToBacklog += (excludeFromStats ? 0 : 1);
+      const isFinished = ['Beaten', 'Completed', 'Continuous', 'Dropped'].includes(gameSummary.completion);
+      if (!excludeFromStats) {
+        summary.acquisitions.totalBeaten += (gameSummary.completion === 'Beaten' ? 1 : 0);
+        summary.acquisitions.totalCompleted += (gameSummary.completion === 'Completed' ? 1 : 0);
+        summary.acquisitions.totalDropped += (gameSummary.completion === 'Dropped' ? 1 : 0);
+        summary.acquisitions.totalContinuous += (gameSummary.completion === 'Continuous' ? 1 : 0);
+        summary.acquisitions.totalFinished += isFinished ? 1 : 0;
+        summary.acquisitions.totalPlayed += (gameSummary.status === 'Played' || gameSummary.status === 'Playing' ? 1 : 0);
+      }
+      summary.acquisitions.totalExcluded += excludeFromStats ? 1 : 0;
 
       if (gameSummary.amountPaid && !isNaN(gameSummary.amountPaid)) {
         summary.acquisitions.totalMoneySpent += (gameSummary.amountPaid || 0);
@@ -482,9 +491,9 @@ export const getYearSummary = (games: CsvData[], year: number): Summary => {
   summary.releaseDecadeTotals.sort((a, b) => a.decade - b.decade);
 
   // add acquisition percentages
-  if (summary.acquisitions.totalAcquired > 0) {
-    summary.acquisitions.percentPlayed = Math.round((summary?.acquisitions.totalPlayed / summary.acquisitions.totalAcquired) * 100)
-    summary.acquisitions.percentFinished = Math.round((summary?.acquisitions.totalFinished / summary.acquisitions.totalAcquired) * 100)
+  if (summary.acquisitions.totalAcquired > 0 && summary.acquisitions.totalAddedToBacklog > 0) {
+    summary.acquisitions.percentPlayed = Math.round((summary?.acquisitions.totalPlayed / summary.acquisitions.totalAddedToBacklog) * 100)
+    summary.acquisitions.percentFinished = Math.round((summary?.acquisitions.totalFinished / summary.acquisitions.totalAddedToBacklog) * 100)
     summary.acquisitionSourceTotals.forEach(ast => {
       ast.percentOfTotalCost = Math.ceil((summary.acquisitions.totalMoneySpent ? ast.totalCost / summary.acquisitions.totalMoneySpent : 0) * 100)
       ast.percentOfTotalGames = Math.ceil((summary.acquisitions.totalAcquired ? ast.totalGames / summary.acquisitions.totalAcquired : 0) * 100);

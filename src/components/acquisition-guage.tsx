@@ -11,41 +11,45 @@ export const AcquisitionGuage = (props: AcquisitionsGuageProps) => {
   const { acquisitionSummary } = props;
 
 
-  const noData = !acquisitionSummary.totalAcquired || !acquisitionSummary.totalFinished;
+  const noData = !acquisitionSummary.totalAddedToBacklog || !acquisitionSummary.totalFinished || !acquisitionSummary.totalPlayed;
   const arcs = useMemo<SubArc[]>(() => {
     let returnArcs: SubArc[] = [];
-    const totalFinishedPercent = Math.ceil(acquisitionSummary.totalFinished / acquisitionSummary.totalAcquired * 100);
-    const totalPlayedPercent = (acquisitionSummary.totalPlayed / acquisitionSummary.totalAcquired * 100);
+    const totalFinishedPercent = Math.ceil(acquisitionSummary.totalFinished / acquisitionSummary.totalAddedToBacklog * 100);
+    const totalPlayedPercent = (acquisitionSummary.totalPlayed / acquisitionSummary.totalAddedToBacklog * 100);
+    console.log('Creating guage: ', { totalFinishedPercent, totalPlayedPercent })
     if (totalFinishedPercent > 0) {
+      console.log('- Adding total finished arc', totalFinishedPercent)
       returnArcs.push(
         {
           limit: totalFinishedPercent,
           color: green[500],
           showTick: true,
           tooltip: {
-            text: 'Percent of acquired games that were beaten or completed.'
+            text: 'Percent of backlogged games that were beaten, completed, dropped, or continuous (excludes No Status and DLC games)'
           },
         });
     }
     if (totalPlayedPercent > 0 && totalPlayedPercent > totalFinishedPercent) {
+      console.log('- Adding total played arc', totalPlayedPercent)
       returnArcs.push(
         {
           limit: totalPlayedPercent,
           color: yellow[700],
           showTick: true,
           tooltip: {
-            text: 'Percent of acquired games that were played.'
+            text: 'Percent of backlogged games that were played (excludes No Status and DLC games)'
           }
         });
     }
     if (noData || totalPlayedPercent < 100) {
+      console.log('- Adding total arc', 100)
       returnArcs.push(
         {
           limit: 100,
           color: red[500],
           showTick: true,
           tooltip: {
-            text: 'Total games acquired'
+            text: 'Total games added to backlog (excludes No Status and DLC games)'
           }
         });
     }
@@ -78,7 +82,7 @@ export const AcquisitionGuage = (props: AcquisitionsGuageProps) => {
             ticks: Array.from('1'.repeat(10)).map((n, i) => { return { value: parseInt(n) * (i + 1) * 10 } })
           }
         }}
-        value={noData ? 0 : Math.ceil(acquisitionSummary.totalPlayed / acquisitionSummary.totalAcquired * 100)}
+        value={noData ? 0 : Math.ceil(acquisitionSummary.totalPlayed / acquisitionSummary.totalAddedToBacklog * 100)}
         minValue={0}
         maxValue={100}
       // style={{ maxWidth: "500px" }}
