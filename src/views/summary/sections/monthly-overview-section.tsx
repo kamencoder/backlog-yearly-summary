@@ -5,7 +5,7 @@ import { green, blue, yellow } from '@mui/material/colors';
 import { useContext, useMemo, useState } from 'react';
 import { DataContext } from '../../../data/data-context';
 import { DateTime } from 'luxon';
-import type { SummaryGameInfo } from '../../../data/summarizer';
+import { getPlayTimeInHours, type SummaryGameInfo } from '../../../data/summarizer';
 import { Game } from '../../../components/game';
 import { Settings } from '@mui/icons-material';
 
@@ -78,7 +78,7 @@ export const MonthlySection = () => {
                   month: monthName,
                   totalBeat: gamesByMonth[monthName].totalBeat,
                   totalComplete: gamesByMonth[monthName].totalComplete,
-                  totalPlaytime: gamesByMonth[monthName].totalPlaytime
+                  totalPlaytime: getPlayTimeInHours(gamesByMonth[monthName].totalPlaytime)
                 })) as any}
               xAxis={[{ dataKey: 'month', scaleType: 'band', id: 'monthAxis' }]}
               yAxis={[
