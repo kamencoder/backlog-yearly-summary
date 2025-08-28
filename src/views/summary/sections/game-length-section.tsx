@@ -29,11 +29,13 @@ export const GameLengthSection = () => {
   }
 
   return (
-    <Grid size={12}>
-      <Card variant="outlined">
+    <Grid size={12} role="region" aria-labelledby="game-length-section-title">
+      <Card variant="outlined" role="region" aria-labelledby="game-length-section-title">
         <CardContent>
           <Stack direction={"row"}>
-            <Typography flex={1} variant="h6" gutterBottom>Game Lengths</Typography>
+            <Typography id="game-length-section-title" flex={1} variant="h6" gutterBottom component="h2">
+              Game Lengths
+            </Typography>
             <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB. Game length is determined by your Playtime entered for each game." />
             <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
               <Settings />
@@ -55,6 +57,8 @@ export const GameLengthSection = () => {
               { dataKey: 'totalTimeSpent', yAxisId: 'totalTime', label: 'Total Time (hrs)', color: yellow[700] }
             ]}
             height={250}
+            aria-label="Line chart showing games finished and total time spent by game length group"
+            aria-labelledby="game-length-section-title"
           />
         </CardContent>
       </Card>

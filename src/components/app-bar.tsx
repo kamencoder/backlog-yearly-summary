@@ -9,6 +9,7 @@ import { DataContext } from '../data/data-context';
 import { Print, Image, BugReport, Settings } from '@mui/icons-material';
 import html2canvas from 'html2canvas';
 import SettingsModal from './settings-modal';
+import { blue } from '@mui/material/colors';
 // import { parseFile, FileInput } from './data-importer';
 
 export default function AppBar() {
@@ -62,40 +63,41 @@ export default function AppBar() {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1, maxWidth: '976px', margin: 'auto' }}>
-        <MuiAppBar position="static">
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-              onClick={() => setDrawerOpen(true)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" sx={{ flexGrow: 1 }} />
-            <Select
-              label="Year"
-              variant="standard"
-              value={dataContext.data.year}
-              onChange={onYearSelectChanged}
-              disableUnderline
-            >
-              {selectableYears.map(year => (<MenuItem value={year}>{year}</MenuItem>))}
-            </Select>
-            <IconButton
-              size="large"
-              color="inherit"
-              aria-label="settings"
-              onClick={() => setSettingsOpen(true)}
-            >
-              <Settings />
-            </IconButton>
-          </Toolbar>
-        </MuiAppBar>
-      </Box>
+      <MuiAppBar position="static" sx={{ backgroundColor: blue[500], maxWidth: "1024px", margin: 'auto' }}>
+        {/* <Box sx={{ maxWidth: "1024px", width: "100%", margin: 'auto' }}> */}
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+            onClick={() => setDrawerOpen(true)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" sx={{ flexGrow: 1 }} />
+          <Select
+            label="Year"
+            variant="standard"
+            value={dataContext.data.year}
+            onChange={onYearSelectChanged}
+            disableUnderline
+            aria-label="Select a different year"
+          >
+            {selectableYears.map(year => (<MenuItem value={year}>{year}</MenuItem>))}
+          </Select>
+          <IconButton
+            size="large"
+            color="inherit"
+            aria-label="settings"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <Settings />
+          </IconButton>
+        </Toolbar>
+        {/* </Box> */}
+      </MuiAppBar>
       {settingsOpen && <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}

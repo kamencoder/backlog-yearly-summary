@@ -37,6 +37,7 @@ const styles = {
     maxWidth: "1024px",
     margin: "auto",
     padding: 3,
+    paddingTop: 0,
     backgroundColor: theme.palette.background.default,  // Set background here so that it shows in screenshots of this element
     [theme.breakpoints.down('sm')]: {
       padding: 0

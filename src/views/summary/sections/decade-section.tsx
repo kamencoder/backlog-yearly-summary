@@ -43,11 +43,13 @@ export const DecadeSection = () => {
   }
 
   return (
-    <Grid size={12}>
-      <Card variant="outlined">
+    <Grid size={12} role="region" aria-labelledby="decade-section-title">
+      <Card variant="outlined" role="region" aria-labelledby="decade-section-title">
         <CardContent>
           <Stack direction={"row"}>
-            <Typography flex={1} variant="h6" gutterBottom>Decades</Typography>
+            <Typography id="decade-section-title" flex={1} variant="h6" gutterBottom component="h2">
+              Decades
+            </Typography>
             <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
             <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
               <Settings />
@@ -59,7 +61,7 @@ export const DecadeSection = () => {
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Box>
-                <Typography style={{ textAlign: 'center' }}>Games Finished by Decade</Typography>
+                <Typography style={{ textAlign: 'center' }} component="h3" id="decade-games-finished-title">Games Finished by Decade</Typography>
                 <PieChart
                   title='Games Finished Per Decade'
                   series={[{
@@ -81,13 +83,15 @@ export const DecadeSection = () => {
                     }
                   }}
                   height={240}
+                  aria-label="Pie chart showing games finished by decade"
+                  aria-labelledby="decade-games-finished-title"
                 />
               </Box>
             </Grid>
             {viewSettings.showPlaytimeStats && (
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Box>
-                  <Typography style={{ textAlign: 'center' }}>Time Played by Decade</Typography>
+                  <Typography style={{ textAlign: 'center' }} component="h3" id="decade-time-played-title">Time Played by Decade</Typography>
                   <PieChart
                     title='Time Played Per Decade'
                     series={[{
@@ -104,6 +108,8 @@ export const DecadeSection = () => {
                     }]}
                     hideLegend
                     height={240}
+                    aria-label="Pie chart showing time played by decade"
+                    aria-labelledby="decade-time-played-title"
                   />
                 </Box>
               </Grid>

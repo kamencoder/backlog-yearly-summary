@@ -57,11 +57,13 @@ export const MonthlySection = () => {
 
   return (
     <>
-      <Grid size={12}>
-        <Card variant="outlined" sx={{ width: "100%" }}>
+      <Grid size={12} role="region" aria-labelledby="monthly-section-title">
+        <Card variant="outlined" sx={{ width: "100%" }} role="region" aria-labelledby="monthly-section-title">
           <CardContent>
             <Stack direction={"row"}>
-              <Typography flex={1} variant="h6" gutterBottom>Completion by month</Typography>
+              <Typography id="monthly-section-title" flex={1} variant="h6" gutterBottom component="h2">
+                Completion by month
+              </Typography>
               <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
               <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
                 <Settings />
@@ -90,6 +92,8 @@ export const MonthlySection = () => {
                 { type: 'bar', dataKey: 'totalComplete', stack: 'month', color: blue[500], label: 'Complete', yAxisId: 'beatCompleteAxis' },
                 { type: 'line', dataKey: 'totalPlaytime', stack: 'other', color: yellow[500], label: 'Playtime (hrs)', yAxisId: 'playtimeAxis' },
               ]}
+              aria-label="Chart showing games finished and playtime by month"
+              aria-labelledby="monthly-section-title"
             >
               <BarPlot />
               <LinePlot />
@@ -102,10 +106,10 @@ export const MonthlySection = () => {
         </Card>
       </Grid>
       {gamesByMonth && Object.keys(gamesByMonth).map(month => (
-        <Grid size={12} key={month}>
+        <Grid size={12} key={month} role="region" aria-label={`Games finished in ${month}`}>
           <Card variant="outlined" sx={{ marginBottom: '6px' }} >
             <CardContent>
-              <Typography key={month} variant="h6" fontWeight={600} style={{ textAlign: 'left' }} gutterBottom>{month}</Typography>
+              <Typography key={month} variant="h6" fontWeight={600} style={{ textAlign: 'left' }} gutterBottom component="h3">{month}</Typography>
               <Grid size={12} container spacing={2} justifyContent="start">
                 {gamesByMonth[month]?.gamesFinished.map(game => <Game key={game.id} game={game} />)}
               </Grid>

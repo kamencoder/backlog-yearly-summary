@@ -40,11 +40,13 @@ export const AcquisitionsSection = () => {
   // const acquisitionSourceSeries: MakeOptional<BarSeriesType, "type">[] = []
 
   return (
-    <Grid size={12}>
-      <Card variant="outlined">
+    <Grid size={12} role="region" aria-labelledby="acquisitions-section-title">
+      <Card variant="outlined" role="region" aria-labelledby="acquisitions-section-title">
         <CardContent>
           <Stack direction={"row"}>
-            <Typography flex={1} variant="h6" gutterBottom>Backlog Additions</Typography>
+            <Typography id="acquisitions-section-title" flex={1} variant="h6" gutterBottom component="h2">
+              Backlog Additions
+            </Typography>
             <InfoIcon text="Includes games acquired within this year based on the Acquisition Date set on the game in IB. The number of games played includes total number of games among those acquired this year which are marked as playing or played. The total number acquired includes all games with an aquisition date this year. The total number of 'backlogged' games excludes those with No Status and any DLC games. The number of games finished includes total number of those acquired this year which are marked beaten or completed." />
             <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
               <Settings />
@@ -80,15 +82,15 @@ export const AcquisitionsSection = () => {
           )}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 12, md: 3 }} flexWrap={"wrap"}>
-              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "row" }} justifyContent={"center"} flexWrap="wrap">
-                <SingleStat value={summary.acquisitions.totalAcquired} label="Acquired" color={purple[300]} />
-                <SingleStat value={summary.acquisitions.totalAddedToBacklog} label="Backlogged" color={red[500]} />
+              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "row" }} justifyContent={"center"} flexWrap="wrap" role="list" aria-label="Acquisition statistics">
+                <SingleStat value={summary.acquisitions.totalAcquired} label="Acquired" color={purple[300]} role="listitem" />
+                <SingleStat value={summary.acquisitions.totalAddedToBacklog} label="Backlogged" color={red[500]} role="listitem" />
               </Stack>
-              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "row" }} justifyContent={"center"} flexWrap="wrap">
-                <SingleStat value={summary.acquisitions.totalPlayed} label="Played" color={yellow[700]} />
-                <SingleStat value={summary.acquisitions.totalBeaten + summary.acquisitions.totalCompleted} label="Finished" color={green[500]} />
-                <SingleStat value={summary.acquisitions.totalContinuous} label="Continuous" color={green[900]} />
-                <SingleStat value={summary.acquisitions.totalDropped} label="Dropped" color={green[900]} />
+              <Stack spacing={1} direction={{ xs: "row", sm: "row", md: "row" }} justifyContent={"center"} flexWrap="wrap" role="list" aria-label="Acquisition status statistics">
+                <SingleStat value={summary.acquisitions.totalPlayed} label="Played" color={yellow[700]} role="listitem" />
+                <SingleStat value={summary.acquisitions.totalBeaten + summary.acquisitions.totalCompleted} label="Finished" color={green[500]} role="listitem" />
+                <SingleStat value={summary.acquisitions.totalContinuous} label="Continuous" color={green[900]} role="listitem" />
+                <SingleStat value={summary.acquisitions.totalDropped} label="Dropped" color={green[900]} role="listitem" />
               </Stack>
             </Grid>
             <Grid size={{ xs: 12, sm: 12, md: 9 }} display={"flex"} justifyContent={"center"}>
@@ -97,9 +99,8 @@ export const AcquisitionsSection = () => {
 
             <Grid size={12}>
               {sectionSettings.showCosts && <Typography flex={1} variant="h6" gutterBottom>Total Spent: {formatCurrency(summary.acquisitions.totalMoneySpent)}</Typography>}
-              {/* <SingleStat value={formatCurrency(summary.acquisitions.totalMoneySpent)} label="Money Spent" color={'#FFF'} /> */}
               {sectionSettings.showSources && (
-                < BarChart
+                <BarChart
                   dataset={summary.acquisitionSourceTotals as any}
                   yAxis={[{
                     dataKey: 'acquisitionSource',
@@ -133,6 +134,8 @@ export const AcquisitionsSection = () => {
                   ]}
                   layout="horizontal"
                   sx={{ height: `${32 * (summary.acquisitionSourceTotals.length < 8 ? 8 : summary.acquisitionSourceTotals.length)}px` }}
+                  aria-label="Bar chart showing percent of games and cost by acquisition source"
+                  aria-labelledby="acquisitions-section-title"
                 />
               )}
               <Accordion>
@@ -141,7 +144,10 @@ export const AcquisitionsSection = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <TableContainer component={Paper}>
-                    <Table aria-label="Acquired Games">
+                    <Table aria-label="Acquired Games" role="table" aria-describedby="acquired-games-caption">
+                      <caption id="acquired-games-caption" style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', overflow: 'hidden' }}>
+                        Table of all games acquired this year, including platform, cost, source, and date acquired.
+                      </caption>
                       <TableHead>
                         <TableRow>
                           <TableCell>Title</TableCell>

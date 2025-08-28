@@ -5,6 +5,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useDataController } from './data/use-data-controller';
 import AppBar from './components/app-bar';
+import { Box, Typography } from '@mui/material';
+import { blue } from '@mui/material/colors';
 
 function App() {
 
@@ -33,6 +35,14 @@ function App() {
             {data.summary && (
               <>
                 <AppBar />
+                <Box sx={{ maxWidth: "1024px", margin: "auto", marginBottom: 2 }}>
+                  <Typography id="year-summary-title" variant="h1" fontWeight={700} textAlign="center" component="h1" sx={{ backgroundColor: blue[600] }} >
+                    {data.summary.year}
+                  </Typography>
+                  <Typography variant="subtitle1" textAlign="center" component="h2" sx={{ backgroundColor: blue[600], paddingBottom: 1 }}>
+                    Yearly Summary
+                  </Typography>
+                </Box>
                 <YearSummary />
               </>
             )}

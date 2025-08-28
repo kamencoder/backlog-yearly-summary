@@ -41,11 +41,13 @@ export const PlatformSection = () => {
     return null;
   }
   return (
-    <Grid size={12}>
-      <Card variant="outlined" sx={{ width: "100%" }}>
+    <Grid size={12} role="region" aria-labelledby="platform-section-title">
+      <Card variant="outlined" sx={{ width: "100%" }} role="region" aria-labelledby="platform-section-title">
         <CardContent>
           <Stack direction={"row"}>
-            <Typography flex={1} variant="h6" gutterBottom>Platforms</Typography>
+            <Typography id="platform-section-title" flex={1} variant="h6" gutterBottom component="h2">
+              Platforms
+            </Typography>
             <InfoIcon text="Includes number of games finished (beat/complete) within this year based on the Completion Date set on the game in IB." />
             <IconButton size="small" onClick={handleMenuClick} aria-label="settings">
               <Settings />
@@ -77,7 +79,7 @@ export const PlatformSection = () => {
               <>
                 <Grid size={{ md: 12, lg: 6 }}>
                   <Box>
-                    <Typography style={{ textAlign: 'center' }}>Games Finished by Platform</Typography>
+                    <Typography style={{ textAlign: 'center' }} component="h3" id="platform-games-finished-title">Games Finished by Platform</Typography>
                     <BarChart
                       dataset={sortedPlatformsByTotalGames as any}
                       yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
@@ -86,13 +88,15 @@ export const PlatformSection = () => {
                       layout="horizontal"
                       sx={{ height: `${25 * (sortedPlatformsByTotalGames.length < 8 ? 8 : sortedPlatformsByTotalGames.length)}px` }}
                       hideLegend
+                      aria-label="Bar chart showing games finished by platform"
+                      aria-labelledby="platform-games-finished-title"
                     />
                   </Box>
                 </Grid>
                 {viewSettings.showPlaytimeStats && sortedPlatformsByTotalTime?.length && (
                   <Grid size={{ md: 12, lg: 6 }}>
                     <Box>
-                      <Typography style={{ textAlign: 'center' }}>Time Spent by Platform</Typography>
+                      <Typography style={{ textAlign: 'center' }} component="h3" id="platform-time-spent-title">Time Spent by Platform</Typography>
                       <BarChart
                         dataset={sortedPlatformsByTotalTime as any}
                         yAxis={[{ dataKey: 'platformAbbreviation', scaleType: 'band', width: 80 }]}
@@ -104,6 +108,8 @@ export const PlatformSection = () => {
                         layout="horizontal"
                         sx={{ height: `${25 * (sortedPlatformsByTotalTime.length < 8 ? 8 : sortedPlatformsByTotalTime.length)}px` }}
                         hideLegend
+                        aria-label="Bar chart showing time spent by platform"
+                        aria-labelledby="platform-time-spent-title"
                       />
                     </Box>
                   </Grid>
@@ -144,6 +150,8 @@ export const PlatformSection = () => {
                 ]}
                 layout="horizontal"
                 sx={{ height: `${32 * (sortedPlatformsByTotalTime.length < 8 ? 8 : sortedPlatformsByTotalTime.length)}px` }}
+                aria-label="Bar chart showing percent of total games and time by platform"
+                aria-labelledby="platform-section-title"
               />
             )}
           </Grid>
