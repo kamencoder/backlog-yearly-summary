@@ -10,7 +10,7 @@ import { blue } from '@mui/material/colors';
 
 function App() {
 
-  const { data, initialize, editGame, editYear, editViewSettings } = useDataController();
+  const { data, initialize, editGame, editYear, editViewSettings, updateUserData } = useDataController();
 
   const darkTheme = createTheme({
     palette: {
@@ -28,6 +28,7 @@ function App() {
             editGame,
             editYear,
             editViewSettings,
+            updateUserData,
             initialize,
           }}>
           <>

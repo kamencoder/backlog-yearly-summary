@@ -4,12 +4,13 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, Typography } from '@mui/material';
-import { DataContext } from '../data/data-context';
-import { Print, Image, BugReport, Settings } from '@mui/icons-material';
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, styled, Typography } from '@mui/material';
+import { DataContext, type UserData } from '../data/data-context';
+import { Print, Image, BugReport, Settings, ImportExportOutlined, ImportExportRounded, ImportExport, UploadFile, FileDownload } from '@mui/icons-material';
 import html2canvas from 'html2canvas';
 import SettingsModal from './settings-modal';
 import { blue } from '@mui/material/colors';
+import { mergeDeep } from '../data/utils';
 // import { parseFile, FileInput } from './data-importer';
 
 export default function AppBar() {
@@ -19,6 +20,7 @@ export default function AppBar() {
   const dataContext = React.useContext(DataContext);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const fileInputRef = React.useRef(null);
 
   const onYearSelectChanged = (e: any) => {
     const year = parseInt(e.target.value?.toString() || currentYear.toString(), 10);
@@ -40,6 +42,57 @@ export default function AppBar() {
   //   }
   //   event.target.value = '';
   // };
+
+  function exportUserData() {
+    const currentUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
+    const userDataToSave = mergeDeep(currentUserData, dataContext.data.userData);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(userDataToSave, null, 2)], {
+      type: "text/plain"
+    }));
+    a.setAttribute("download", "backlog-yearly-summary-user-data.json");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+
+  const handleImportUserDataClicked = React.useCallback(() => {
+    if (fileInputRef.current) {
+      (fileInputRef.current as any).click(); // Trigger the hidden file input
+    }
+  }, []);
+
+  const ImportUserDataFileSelected = React.useCallback(async (event: any) => {
+    console.log("Importing file:", event.target.files[0]);
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        var reader = new FileReader();
+
+        reader.onload = function (event) {
+          const userDataJson = event?.target?.result;
+          if (typeof userDataJson === 'string') {
+            try {
+              localStorage.setItem('user-data', userDataJson);
+              const userDataObj = JSON.parse(userDataJson) as UserData;
+              dataContext.updateUserData(userDataObj);
+            } catch (e) {
+              console.error("Invalid JSON in imported file.", e);
+            }
+          } else {
+            console.error("File could not be read as text.");
+          }
+        }
+
+        const fileText = reader.readAsText(event.target.files[0]);
+        console.log('Loaded file', fileText);
+      } catch (error) {
+      }
+    }
+    event.target.value = null;
+  }, []);
+
 
   function captureScreenshot() {
     const captureElement = document.querySelector('#year-summary-container') // Select the element you want to capture. Select the <body> element to capture full page.
@@ -63,8 +116,15 @@ export default function AppBar() {
 
   return (
     <>
+      <input
+        id="user-data-file-import"
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        style={{ display: 'none' }}
+        onChange={ImportUserDataFileSelected}
+      />
       <MuiAppBar position="static" sx={{ backgroundColor: blue[500], maxWidth: "1024px", margin: 'auto' }}>
-        {/* <Box sx={{ maxWidth: "1024px", width: "100%", margin: 'auto' }}> */}
         <Toolbar>
           <IconButton
             size="large"
@@ -96,7 +156,6 @@ export default function AppBar() {
             <Settings />
           </IconButton>
         </Toolbar>
-        {/* </Box> */}
       </MuiAppBar>
       {settingsOpen && <SettingsModal
         open={settingsOpen}
@@ -133,6 +192,22 @@ export default function AppBar() {
                   <Print />
                 </ListItemIcon>
                 <ListItemText primary="Print PDF" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem sx={{ justifySelf: 'end' }} disablePadding>
+              <ListItemButton onClick={exportUserData}>
+                <ListItemIcon>
+                  <FileDownload />
+                </ListItemIcon>
+                <ListItemText primary="Export User Data" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem sx={{ justifySelf: 'end' }} disablePadding>
+              <ListItemButton onClick={handleImportUserDataClicked}>
+                <ListItemIcon>
+                  <UploadFile />
+                </ListItemIcon>
+                <ListItemText primary="Import User Data" />
               </ListItemButton>
             </ListItem>
             <ListItem sx={{ justifySelf: 'end' }} disablePadding>

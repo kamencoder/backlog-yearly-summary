@@ -48,6 +48,7 @@ export type DeepPartial<T> = {
 export interface DataContextProps {
   data: Data;
   initialize: (games: CsvData[]) => void;
+  updateUserData: (userData: UserData) => void;
   editYear: (year: number) => void;
   editGame: (gameId: string, gameEdit: GameEdit) => void;
   editViewSettings: (settings: DeepPartial<ViewSettings>) => void;

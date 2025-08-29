@@ -1,46 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { getYearSummary, type Summary } from "./summarizer";
 import { defaultContext, type CsvData, type Data, type DeepPartial, type UserData, type ViewSettings } from "./data-context";
+import { mergeDeep } from "./utils";
 
 const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 
 export const useDataController = () => {
 
+  const startingData = mergeDeep(defaultContext.data.userData, initialUserData);
   const currentYear = (new Date()).getFullYear();
   const [csvData, setCsvData] = useState<{ games: CsvData[] }>();
-  const [userData, setUserData] = useState<UserData>({
-    ...defaultContext.data.userData,
-    ...initialUserData,
-    gameEdits: {
-      ...initialUserData.gameEdits
-    },
-    viewSettings: {
-      ...defaultContext.data.userData.viewSettings,
-      ...initialUserData.viewSettings,
-      sectionSettings: {
-        platform: {
-          ...defaultContext.data.userData.viewSettings.sectionSettings.platform,
-          ...initialUserData.sectionSettings?.platform,
-        },
-        gameLength: {
-          ...defaultContext.data.userData.viewSettings.sectionSettings.gameLength,
-          ...initialUserData.sectionSettings?.gameLength,
-        },
-        decade: {
-          ...defaultContext.data.userData.viewSettings.sectionSettings.decade,
-          ...initialUserData.sectionSettings?.decade,
-        },
-        acquisitions: {
-          ...defaultContext.data.userData.viewSettings.sectionSettings.acquisitions,
-          ...initialUserData.sectionSettings?.acquisitions,
-        },
-        monthly: {
-          ...defaultContext.data.userData.viewSettings.sectionSettings.monthly,
-          ...initialUserData.sectionSettings?.monthly,
-        },
-      }
-    }
-  });
+  const [userData, setUserData] = useState<UserData>(startingData);
   const [baseSummary, setBaseSummary] = useState<Summary | null>(null);
   const [selectedYear, setSelectedYear] = useState(currentYear);
 
@@ -84,14 +54,7 @@ export const useDataController = () => {
     if (!summary) return;
     try {
       const currentUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
-      localStorage.setItem('user-data', JSON.stringify({
-        ...currentUserData,
-        ...userData,
-        gameEdits: {
-          ...currentUserData?.gameEdits,
-          ...userData?.gameEdits,
-        }
-      }))
+      localStorage.setItem('user-data', JSON.stringify(mergeDeep(currentUserData, userData)));
     } catch (err) {
       console.error('Unable to save user-data to local storage', err);
     }
@@ -102,6 +65,9 @@ export const useDataController = () => {
     initialize: (games: CsvData[]) => {
       setCsvData({ games });
     },
+    updateUserData: (userData: UserData) => {
+      setUserData(userData);
+    },
     editYear: (year: number) => {
       setSelectedYear(year);
     },
@@ -110,10 +76,7 @@ export const useDataController = () => {
         ...userData,
         gameEdits: {
           ...userData.gameEdits,
-          [gameId]: {
-            ...userData.gameEdits[gameId],
-            ...gameEdit
-          }
+          [gameId]: mergeDeep(userData.gameEdits[gameId], gameEdit)
         }
       }
       setUserData(newUserData);
@@ -121,32 +84,7 @@ export const useDataController = () => {
     editViewSettings: (settings: DeepPartial<ViewSettings>) => {
       const newUserData = {
         ...userData,
-        viewSettings: {
-          ...userData.viewSettings,
-          ...settings,
-          sectionSettings: {
-            platform: {
-              ...userData.viewSettings.sectionSettings.platform,
-              ...settings.sectionSettings?.platform,
-            },
-            gameLength: {
-              ...userData.viewSettings.sectionSettings.gameLength,
-              ...settings.sectionSettings?.gameLength,
-            },
-            decade: {
-              ...userData.viewSettings.sectionSettings.decade,
-              ...settings.sectionSettings?.decade,
-            },
-            acquisitions: {
-              ...userData.viewSettings.sectionSettings.acquisitions,
-              ...settings.sectionSettings?.acquisitions,
-            },
-            monthly: {
-              ...userData.viewSettings.sectionSettings.monthly,
-              ...settings.sectionSettings?.monthly,
-            },
-          }
-        }
+        viewSettings: mergeDeep(userData.viewSettings, settings),
       }
       setUserData(newUserData);
     }

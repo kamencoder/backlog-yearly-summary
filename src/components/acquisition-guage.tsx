@@ -16,9 +16,7 @@ export const AcquisitionGuage = (props: AcquisitionsGuageProps) => {
     let returnArcs: SubArc[] = [];
     const totalFinishedPercent = Math.ceil(acquisitionSummary.totalFinished / acquisitionSummary.totalAddedToBacklog * 100);
     const totalPlayedPercent = (acquisitionSummary.totalPlayed / acquisitionSummary.totalAddedToBacklog * 100);
-    console.log('Creating guage: ', { totalFinishedPercent, totalPlayedPercent })
     if (totalFinishedPercent > 0) {
-      console.log('- Adding total finished arc', totalFinishedPercent)
       returnArcs.push(
         {
           limit: totalFinishedPercent,
@@ -30,7 +28,6 @@ export const AcquisitionGuage = (props: AcquisitionsGuageProps) => {
         });
     }
     if (totalPlayedPercent > 0 && totalPlayedPercent > totalFinishedPercent) {
-      console.log('- Adding total played arc', totalPlayedPercent)
       returnArcs.push(
         {
           limit: totalPlayedPercent,
@@ -42,7 +39,6 @@ export const AcquisitionGuage = (props: AcquisitionsGuageProps) => {
         });
     }
     if (noData || totalPlayedPercent < 100) {
-      console.log('- Adding total arc', 100)
       returnArcs.push(
         {
           limit: 100,
