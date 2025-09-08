@@ -33,7 +33,7 @@ export const useDataController = () => {
         ...userData.gameEdits?.[g.id],
       }))
     }
-  }, [baseSummary, userData])
+  }, [baseSummary, userData.gameEdits])
 
   const data = useMemo<Data>((): Data => {
     return {
@@ -76,7 +76,7 @@ export const useDataController = () => {
         ...userData,
         gameEdits: {
           ...userData.gameEdits,
-          [gameId]: mergeDeep(userData.gameEdits[gameId], gameEdit)
+          [gameId]: mergeDeep(userData.gameEdits[gameId] || {}, gameEdit)
         }
       }
       setUserData(newUserData);
