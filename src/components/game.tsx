@@ -91,6 +91,7 @@ export const Game = (props: GameProps) => {
         {game.coverImage && <CardMedia
           sx={styles.gameCoverImage}
           image={game.coverImage || ''}
+          title={game.title}
         />
         }
         <CardContent sx={styles.gameCardContent}>
