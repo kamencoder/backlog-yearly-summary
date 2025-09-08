@@ -48,6 +48,9 @@ export const MonthlySection = () => {
       }
       return acc;
     }, {} as Record<string, MonthSummary>) || {};
+    Object.keys(monthData).forEach(month => {
+      monthData[month].gamesFinished.sort((a, b) => (a.completionDateRaw || '').localeCompare(b.completionDateRaw || ''));
+    });
     return monthData;
   }, [summary?.games]);
 
