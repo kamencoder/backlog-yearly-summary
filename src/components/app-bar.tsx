@@ -45,7 +45,7 @@ export default function AppBar() {
 
   function exportUserData() {
     const currentUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
-    const userDataToSave = mergeDeep(currentUserData, dataContext.data.userData);
+    const userDataToSave = mergeDeep(currentUserData || {}, dataContext.data.userData);
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(userDataToSave, null, 2)], {
       type: "text/plain"

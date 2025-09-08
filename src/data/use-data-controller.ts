@@ -7,7 +7,7 @@ const initialUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
 
 export const useDataController = () => {
 
-  const startingData = mergeDeep(defaultContext.data.userData, initialUserData);
+  const startingData = mergeDeep(defaultContext.data.userData || {}, initialUserData);
   const currentYear = (new Date()).getFullYear();
   const [csvData, setCsvData] = useState<{ games: CsvData[] }>();
   const [userData, setUserData] = useState<UserData>(startingData);
@@ -54,7 +54,7 @@ export const useDataController = () => {
     if (!summary) return;
     try {
       const currentUserData = JSON.parse(localStorage.getItem('user-data') || "{}");
-      localStorage.setItem('user-data', JSON.stringify(mergeDeep(currentUserData, userData)));
+      localStorage.setItem('user-data', JSON.stringify(mergeDeep(currentUserData || {}, userData)));
     } catch (err) {
       console.error('Unable to save user-data to local storage', err);
     }
@@ -84,7 +84,7 @@ export const useDataController = () => {
     editViewSettings: (settings: DeepPartial<ViewSettings>) => {
       const newUserData = {
         ...userData,
-        viewSettings: mergeDeep(userData.viewSettings, settings),
+        viewSettings: mergeDeep(userData.viewSettings || {}, settings),
       }
       setUserData(newUserData);
     }
