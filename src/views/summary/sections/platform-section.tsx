@@ -143,8 +143,8 @@ export const PlatformSection = () => {
                     dataKey: 'percentOfTotalTime', xAxisId: 'totalTimeAxis',
                     label: "% of Total Time", color: yellow[700],
                     valueFormatter: (x, context) => {
-                      const totalTime = sortedPlatformsByTotalTime[context.dataIndex].totalTime;
-                      return `${x}% (${totalTime} hr${totalTime !== 1 ? 's' : ''})`;
+                      const totalTimeHrs = sortedPlatformsByTotalTime[context.dataIndex].totalTimeHours;
+                      return `${x}% (${totalTimeHrs} hr${totalTimeHrs !== 1 ? 's' : ''})`;
                     },
                   },
                 ]}
