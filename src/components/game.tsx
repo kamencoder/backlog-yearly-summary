@@ -20,7 +20,7 @@ export const Game = (props: GameProps) => {
   const { viewSettings } = data.userData;
 
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setMenuElement(event.currentTarget);
   };
   const handleMenuClose = () => {
@@ -92,11 +92,20 @@ export const Game = (props: GameProps) => {
           sx={styles.gameCoverImage}
           image={game.coverImage || ''}
           title={game.title}
+          onClick={handleMenuClick}
         />
         }
         <CardContent sx={styles.gameCardContent}>
           {!game.coverImage && (
-            <Box sx={styles.gameCoverImage} justifyContent="center" display="flex" flexDirection="column" textAlign="center">
+            <Box
+              sx={[styles.gameCoverImage, { cursor: 'pointer' }]}
+              justifyContent="center"
+              display="flex"
+              flexDirection="column"
+              textAlign="center"
+              onClick={handleMenuClick}
+              id={`edit-game-${game.id}`}
+            >
               <Typography variant="body1" fontWeight="bold" sx={styles.gameCoverImageTextPlaceholder}>
                 {game.title}
               </Typography>
