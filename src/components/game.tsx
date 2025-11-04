@@ -1,8 +1,9 @@
 import { Box, Button, Card, CardContent, CardMedia, IconButton, Menu, MenuItem, Modal, Stack, Typography, TextField, Rating, type Theme, Chip } from "@mui/material";
 import { getPlayTimeInHours, type SummaryGameInfo } from "../data/summarizer";
-import { MoreVert, Search } from "@mui/icons-material";
+import { Search, Widgets } from "@mui/icons-material";
 import { useContext, useState } from "react";
 import { DataContext, type GameEdit } from "../data/data-context";
+import { blue, green } from "@mui/material/colors";
 
 export interface GameProps {
   game: SummaryGameInfo;
@@ -57,8 +58,13 @@ export const Game = (props: GameProps) => {
     }),
     gameCoverImage: () => ({
       aspectRatio: 3 / 4,
+      cursor: 'pointer'
     }),
-    gameCoverImageTextPlaceholder: (theme: Theme) => ({
+    gameCoverImagePlaceholder: () => ({
+      maxHeight: "240px",
+      width: "100%",
+    }),
+    gameCoverImagePlaceholderText: (theme: Theme) => ({
       fontSize: "24px",
       overflow: "hidden",
       wordWrap: "break-word",
@@ -80,7 +86,20 @@ export const Game = (props: GameProps) => {
       border: '2px solid #000',
       boxShadow: 24,
       p: 4,
+    },
+    completionBar: {
+      marginTop: '0.5em',
+      // Negative margins to fill bottom of the card.
+      marginBottom: '-1em',
+      marginLeft: '-1em',
+      marginRight: '-1em',
+      paddingLeft: '1em',
+      textAlign: 'center',
+      height: '1.5em',
+      fontSize: '10px',
+      backgroundColor: game.completion === "Completed" ? blue[500] : green[500],
     }
+
   };
 
 
@@ -91,21 +110,21 @@ export const Game = (props: GameProps) => {
           sx={styles.gameCoverImage}
           image={game.coverImage || ''}
           title={game.title}
-          onClick={handleMenuClick}
+          onClick={onEditClick}
         />
         }
         <CardContent sx={styles.gameCardContent}>
           {!game.coverImage && (
             <Box
-              sx={[styles.gameCoverImage, { cursor: 'pointer' }]}
+              sx={[styles.gameCoverImage, styles.gameCoverImagePlaceholder]}
               justifyContent="center"
               display="flex"
               flexDirection="column"
               textAlign="center"
-              onClick={handleMenuClick}
+              onClick={onEditClick}
               id={`edit-game-${game.id}`}
             >
-              <Typography variant="body1" fontWeight="bold" sx={styles.gameCoverImageTextPlaceholder}>
+              <Typography variant="body1" fontWeight="bold" sx={styles.gameCoverImagePlaceholderText}>
                 {game.title}
               </Typography>
             </Box>
@@ -122,10 +141,9 @@ export const Game = (props: GameProps) => {
                 </Typography>
               )}
               <Rating size={"small"} name="game-rating" value={game.rating} precision={0.5} readOnly />
-            </Stack>
-            <Stack height={"100%"} alignSelf={"end"} gap={"2px"}>
-              {game.completion === "Completed" && <Chip label="100%" size="small" color="info" sx={{ fontWeight: 700, fontSize: '10px' }} />}
-              <IconButton id={`edit-game-${game.id}`} onClick={handleMenuClick} size="small" sx={{ maxHeight: "2em", alignSelf: 'flex-end' }}><MoreVert /></IconButton>
+              <Box sx={styles.completionBar}>
+                {game.completion === "Completed" ? 'Completed' : 'Finished'}
+              </Box>
             </Stack>
             <Menu
               anchorEl={menuElement}

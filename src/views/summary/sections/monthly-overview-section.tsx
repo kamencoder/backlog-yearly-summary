@@ -31,11 +31,6 @@ export const MonthlySection = () => {
       display: 'flex',
       flexWrap: 'wrap',
       gap: '8px',
-      // flexBasis: '20%',
-      // flexGrow: 0,
-      // [theme.breakpoints.down('sm')]: {
-      //   flexBasis: '25%',
-      // }
     }),
   };
 
