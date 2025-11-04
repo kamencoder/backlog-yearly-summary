@@ -17,7 +17,7 @@ export const FileInput: React.FC<{ onChange: (event: React.ChangeEvent<HTMLInput
     whiteSpace: 'nowrap',
     width: 1,
   })
-  return <StyledFileInput id="export-data-file-input" type="file" accept=".csv" onChange={onChange} />;
+  return <StyledFileInput id="export-data-file-input" type="file" onChange={onChange} />;
 };
 
 export const parseFile = (file: File): Promise<CsvData[]> => {
