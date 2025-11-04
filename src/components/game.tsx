@@ -1,6 +1,6 @@
-import { Box, Button, Card, CardContent, CardMedia, IconButton, Menu, MenuItem, Modal, Stack, Typography, TextField, Rating, type Theme, Chip } from "@mui/material";
+import { Box, Button, Card, CardContent, CardMedia, IconButton, Menu, MenuItem, Modal, Stack, Typography, TextField, Rating, type Theme } from "@mui/material";
 import { getPlayTimeInHours, type SummaryGameInfo } from "../data/summarizer";
-import { Search, Widgets } from "@mui/icons-material";
+import { Search } from "@mui/icons-material";
 import { useContext, useState } from "react";
 import { DataContext, type GameEdit } from "../data/data-context";
 import { blue, green } from "@mui/material/colors";
@@ -21,9 +21,9 @@ export const Game = (props: GameProps) => {
   const { viewSettings } = data.userData;
 
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuElement(event.currentTarget);
-  };
+  // const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  //   setMenuElement(event.currentTarget);
+  // };
   const handleMenuClose = () => {
     setMenuElement(null);
   };

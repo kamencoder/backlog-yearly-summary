@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Grid, IconButton, Menu, MenuItem, Stack, Typography, type Theme } from '@mui/material';
+import { Box, Card, CardContent, Grid, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import InfoIcon from '../../../components/info-icon';
 import { ChartContainer, BarPlot, LinePlot, ChartsXAxis, ChartsYAxis, ChartsTooltip } from '@mui/x-charts';
 import { green, blue, yellow } from '@mui/material/colors';
@@ -27,7 +27,7 @@ export const MonthlySection = () => {
 
 
   const styles = {
-    gameContainer: (theme: Theme) => ({
+    gameContainer: () => ({
       display: 'flex',
       flexWrap: 'wrap',
       gap: '8px',
