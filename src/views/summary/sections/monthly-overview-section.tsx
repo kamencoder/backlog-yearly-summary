@@ -1,4 +1,4 @@
-import { Card, CardContent, Grid, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, Grid, IconButton, Menu, MenuItem, Stack, Typography, type Theme } from '@mui/material';
 import InfoIcon from '../../../components/info-icon';
 import { ChartContainer, BarPlot, LinePlot, ChartsXAxis, ChartsYAxis, ChartsTooltip } from '@mui/x-charts';
 import { green, blue, yellow } from '@mui/material/colors';
@@ -26,6 +26,18 @@ export const MonthlySection = () => {
   };
 
 
+  const styles = {
+    gameContainer: (theme: Theme) => ({
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '8px',
+      // flexBasis: '20%',
+      // flexGrow: 0,
+      // [theme.breakpoints.down('sm')]: {
+      //   flexBasis: '25%',
+      // }
+    }),
+  };
 
   interface MonthSummary { gamesFinished: SummaryGameInfo[]; totalBeat: number; totalComplete: number; totalPlaytime: number; }
   const gamesByMonth = useMemo(() => {
@@ -113,9 +125,11 @@ export const MonthlySection = () => {
           <Card variant="outlined" sx={{ marginBottom: '6px' }} >
             <CardContent>
               <Typography key={month} variant="h6" fontWeight={600} style={{ textAlign: 'left' }} gutterBottom component="h3">{month}</Typography>
-              <Grid size={12} container spacing={2} justifyContent="start">
+              {/* <Grid size={12} container spacing={2} justifyContent="start"> */}
+              <Box sx={styles.gameContainer}>
                 {gamesByMonth[month]?.gamesFinished.map(game => <Game key={game.id} game={game} />)}
-              </Grid>
+              </Box>
+              {/* </Grid> */}
             </CardContent>
           </Card>
         </Grid>

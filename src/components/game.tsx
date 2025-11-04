@@ -46,17 +46,17 @@ export const Game = (props: GameProps) => {
     gameCard: (theme: Theme) => ({
       flex: 'auto',
       height: '100%',
-      maxWidth: '180px',
+      flexBasis: 'calc(20% - 8px)',
+      flexGrow: 0,
+      [theme.breakpoints.down('md')]: {
+        flexBasis: 'calc(25% - 8px)',
+      },
       [theme.breakpoints.down('sm')]: {
-        maxWidth: '98px',
+        flexBasis: 'calc(33.3% - 8px)',
       }
     }),
-    gameCoverImage: (theme: Theme) => ({
+    gameCoverImage: () => ({
       aspectRatio: 3 / 4,
-      height: "240px",
-      [theme.breakpoints.down('sm')]: {
-        height: '130px'
-      },
     }),
     gameCoverImageTextPlaceholder: (theme: Theme) => ({
       fontSize: "24px",
@@ -86,7 +86,6 @@ export const Game = (props: GameProps) => {
 
   return (
     <>
-
       <Card sx={styles.gameCard} >
         {game.coverImage && <CardMedia
           sx={styles.gameCoverImage}
@@ -125,7 +124,7 @@ export const Game = (props: GameProps) => {
               <Rating size={"small"} name="game-rating" value={game.rating} precision={0.5} readOnly />
             </Stack>
             <Stack height={"100%"} alignSelf={"end"} gap={"2px"}>
-              {game.completion === "Completed" && <Chip label="100%" size="small" color="info" sx={{ fontWeight: 700 }} />}
+              {game.completion === "Completed" && <Chip label="100%" size="small" color="info" sx={{ fontWeight: 700, fontSize: '10px' }} />}
               <IconButton id={`edit-game-${game.id}`} onClick={handleMenuClick} size="small" sx={{ maxHeight: "2em", alignSelf: 'flex-end' }}><MoreVert /></IconButton>
             </Stack>
             <Menu
