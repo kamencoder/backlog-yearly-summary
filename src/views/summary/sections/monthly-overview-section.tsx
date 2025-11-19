@@ -95,7 +95,7 @@ export const MonthlySection = () => {
               xAxis={[{ dataKey: 'month', scaleType: 'band', id: 'monthAxis' }]}
               yAxis={[
                 { id: 'beatCompleteAxis', scaleType: 'linear', position: 'left', label: 'Games Finished' },
-                { id: 'playtimeAxis', scaleType: 'linear', position: 'right', label: 'Playtime (hrs)' }
+                { id: 'playtimeAxis', scaleType: 'linear', position: 'right', label: 'Playtime (hrs)', min: 0 }
               ]}
               series={[
                 { type: 'bar', dataKey: 'totalBeat', stack: 'month', color: green[500], label: 'Beat', yAxisId: 'beatCompleteAxis' },
