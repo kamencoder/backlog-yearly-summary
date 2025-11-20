@@ -27,7 +27,7 @@ export const AcquisitionsSection = () => {
     handleMenuClose();
   };
   const gamesAcquired = useMemo(() => {
-    return summary?.games.filter(g => g.acquiredThisYear)
+    return summary?.games.filter(g => g.acquiredThisYear).sort((a, b) => (b.acquisitionDateRaw || '').localeCompare(a.acquisitionDateRaw || ''));
   }, [summary?.games])
 
   if (!summary) {
